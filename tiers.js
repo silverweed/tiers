@@ -26,6 +26,7 @@ window.addEventListener('load', () => {
 	for (let img_name of IMAGES) {
 		let img = document.createElement('img');
 		img.src = img_name;
+		img.style.userSelect = 'none';
 		img.classList.add('draggable');
 		img.draggable = true;
 		img.ondragstart = "event.dataTransfer.setData('text/plain', null)";

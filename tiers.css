@@ -22,6 +22,7 @@ body {
 	border-top-width: 1px;
 	border-right-width: 1px;
 	display: flex;
+	user-select: none;
 }
 
 .last-row {
