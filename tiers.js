@@ -26,6 +26,7 @@ window.addEventListener('load', () => {
 	for (let img_name of IMAGES) {
 		let img = document.createElement('img');
 		img.src = img_name;
+		img.classList.add('draggable');
 		img.draggable = true;
 		img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
 		img.addEventListener('mousedown', (evt) => {
@@ -48,6 +49,8 @@ window.addEventListener('mouseup', end_drag);
 window.addEventListener('dragend', end_drag);
 
 function make_accept_drop(elem) {
+	elem.classList.add('droppable');
+
 	elem.addEventListener('dragenter', (evt) => {
 		evt.target.classList.add('drag-entered');
 	});
@@ -58,11 +61,11 @@ function make_accept_drop(elem) {
 		evt.preventDefault();
 	});
 	elem.addEventListener('drop', (evt) => {
-		if (dragged_image) {
-			evt.preventDefault();
+		evt.preventDefault();
+		evt.target.classList.remove('drag-entered');
+		if (dragged_image && evt.target.classList.contains('droppable')) {
 			dragged_image.parentNode.removeChild(dragged_image);
 			event.target.appendChild(dragged_image);
-			evt.target.classList.remove('drag-entered');
 		}
 	});
 }

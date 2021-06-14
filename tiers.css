@@ -70,23 +70,27 @@ body {
 	min-height: 100px;
 	max-height: 200px;
 	overflow-y: auto;
+	overflow-x: wrap;
 	width: 90%;
 	margin-top: 20px;
+	flex-wrap: wrap;
 }
 
 .images.drag-entered {
 	background-color: #888;
 }
 
-.images img {
+img.draggable {
 	cursor: grab;
+	width: 100px;
+	height: 100px;
 }
 
-.images img:hover {
+img.draggable:hover {
 	filter: brightness(0.6);
 }
 
-.images img.dragged {
+img.draggable.dragged {
 	filter: brightness(0.4);
 }
 
