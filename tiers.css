@@ -1,0 +1,100 @@
+body {
+	background-color: #333;
+}
+
+.tierlist {
+	min-width: 80%;
+}
+
+.tierlist th, td {
+	width: 100px;
+	height: 100px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-flow: row;
+	font-size: 30px;
+	font-family: sans-serif;
+}
+
+.tierlist tr {
+	border: 0px solid #666;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	display: flex;
+}
+
+.last-row {
+	border-bottom-width: 1px !important;
+}
+
+.tierlist tr:hover {
+	background-color: #666;
+}
+
+.tierlist tr.drag-entered {
+	background-color: #888;
+}
+
+.s {
+	background: #ff6666;
+}
+
+.a {
+	background: #f0a731;
+}
+
+.b {
+	background: #f4d95b;
+}
+
+.c {
+	background: #66ff66;
+}
+
+.d {
+	background: #58c8f4;
+}
+
+.e {
+	background: #5b76f4;
+}
+
+.f {
+	background: #f45bed;
+}
+
+.images {
+	display: flex;
+	border: 1px solid #666;
+	min-height: 100px;
+	max-height: 200px;
+	overflow-y: auto;
+	width: 90%;
+	margin-top: 20px;
+}
+
+.images.drag-entered {
+	background-color: #888;
+}
+
+.images img {
+	cursor: grab;
+}
+
+.images img:hover {
+	filter: brightness(0.6);
+}
+
+.images img.dragged {
+	filter: brightness(0.4);
+}
+
+.load-img {
+	border: 0px;
+	height: 100px;
+}
+
+#load-img-input {
+	display: none;
+}
