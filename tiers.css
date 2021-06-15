@@ -132,3 +132,14 @@ img.draggable.dragged, .load-img:active {
 .load-img img {
 	user-select: none;
 }
+
+.bottom-container {
+	display: flex;
+	flex-flow: row;
+	align-items: center;
+	margin-top: 20px;
+}
+
+.bottom-container > div {
+	margin: 0;
+}

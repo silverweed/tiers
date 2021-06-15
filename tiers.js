@@ -32,7 +32,6 @@ function load_images() {
 		img.style.userSelect = 'none';
 		img.classList.add('draggable');
 		img.draggable = true;
-		img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
 		img.addEventListener('mousedown', (evt) => {
 			dragged_image = evt.target;
 			dragged_image.classList.add("dragged");
