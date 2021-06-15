@@ -13,31 +13,31 @@
     </div>
     <section class='main-content'>
         <table class='tierlist'>
-            <tr>
-                <th class='s'>S</th>
+            <tr class='s'>
+                <th>S</th>
             </tr>
-            <tr>
-                <th class='a'>A</th>
+            <tr class='a'>
+                <th>A</th>
             </tr>
-            <tr>
-                <th class='b'>B</th>
+            <tr class='b'>
+                <th>B</th>
             </tr>
-            <tr>
-                <th class='c'>C</th>
+            <tr class='c'>
+                <th>C</th>
             </tr>
-            <tr>
-                <th class='d'>D</th>
+            <tr class='d'>
+                <th>D</th>
             </tr>
-            <tr>
-                <th class='e'>E</th>
+            <tr class='e'>
+                <th>E</th>
             </tr>
-            <tr class='last-row'>
-                <th class='f'>F</th>
+            <tr class='f last-row'>
+                <th>F</th>
             </tr>
         </table>
         <div class='bottom-container'>
             <div class='buttons-container'>
-                <div class='button load-img'>
+                <div class='button'>
                     <label for='load-img-input'>
                         <img src='plus.png' title='Add images'/>
                     </label>
@@ -50,16 +50,16 @@
                     <input id='reset-list-input' type='button' />
                 </div>
                 <div class='button'>
-                    <label for='export'>
+                    <label for='export-input'>
                         <img src='export.png' title='Export'>
                     </label>
                     <input id='export-input' type='button' />
                 </div>
                 <div class='button'>
-                    <label for='import'>
-                        <img src='import.png' title='Import'>
+                    <label for='import-input'>
+                        <img src='import.png' title='Import'/>
                     </label>
-                    <input id='import-input' type='button' />
+                    <input id='import-input' type='file' accept='.json' multiple/>
                 </div>
             </div>
             <section class='images'></section>

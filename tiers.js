@@ -17,6 +17,9 @@
 
 'use strict';
 
+// Use to serialize the tier list
+let tierlist = {};
+
 let dragged_image;
 
 function load_images() {
@@ -38,15 +41,19 @@ function load_images() {
 	images.appendChild(fragment);
 }
 
-function reset_list() {
+function reset_list(clear_images = false) {
 	document.querySelectorAll('.tierlist td').forEach((item) => {
 		let images = document.querySelector('.images');
 		for (let i = 0; i < item.children.length; ++i) {
 			let img = item.children[i];
 			item.removeChild(img);
-			images.appendChild(img);
+			if (!clear_images) {
+				images.appendChild(img);
+			}
 		}
+		item.parentNode.removeChild(item);
 	});
+	tierlist = {};
 }
 
 window.addEventListener('load', () => {
@@ -57,7 +64,7 @@ window.addEventListener('load', () => {
 
 	let title_label = document.querySelector('.title-label');
 	let title_input = document.getElementById('title-input');
-	
+
 	function change_title(evt) {
 		title_input.style.display = 'none';
 		title_label.innerText = title_input.value;
@@ -80,16 +87,7 @@ window.addEventListener('load', () => {
 		for (let file of evt.target.files) {
 			let reader = new FileReader();
 			reader.addEventListener('load', (load_evt) => {
-				let img = document.createElement('img');
-				img.src = load_evt.target.result;
-				img.style.userSelect = 'none';
-				img.classList.add('draggable');
-				img.draggable = true;
-				img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
-				img.addEventListener('mousedown', (evt) => {
-					dragged_image = evt.target;
-					dragged_image.classList.add("dragged");
-				});
+				let img = create_img_with_src(load_evt.target.result);
 				images.appendChild(img);
 			});
 			reader.readAsDataURL(file);
@@ -101,7 +99,90 @@ window.addEventListener('load', () => {
 			reset_list();
 		}
 	});
+
+	document.getElementById('export-input').addEventListener('click', () => {
+		let name = prompt('Please give a name to this tierlist');
+		if (name) {
+			save_tierlist(`${name}.json`);
+		}
+	});
+
+	document.getElementById('import-input').addEventListener('input', (evt) => {
+		if (!evt.target.files) {
+			return;
+		}
+		let file = evt.target.files[0];
+		let reader = new FileReader();
+		reader.addEventListener('load', (load_evt) => {
+			let raw = load_evt.target.result;
+			let parsed = JSON.parse(raw);
+			if (!parsed) {
+				alert("Failed to parse data");
+				return;
+			}
+			reset_list(true);
+			load_tierlist(parsed);
+		});
+		reader.readAsText(file);
+	});
 });
+
+function create_img_with_src(src) {
+	let img = document.createElement('img');
+	img.src = src;
+	img.style.userSelect = 'none';
+	img.classList.add('draggable');
+	img.draggable = true;
+	img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
+	img.addEventListener('mousedown', (evt) => {
+		dragged_image = evt.target;
+		dragged_image.classList.add("dragged");
+	});
+	return img;
+}
+
+function save(filename, text) {
+	var el = document.createElement('a');
+	el.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(text));
+	el.setAttribute('download', filename);
+	el.style.display = 'none';
+	document.body.appendChild(el);
+	el.click();
+	document.body.removeChild(el);
+}
+
+function save_tierlist(filename) {
+	let serialized_tierlist = {};
+	for (let key in tierlist) {
+		let imgs = tierlist[key];
+		serialized_tierlist[key] = imgs.map(img => img.src);
+	}
+	serialized_tierlist.title = document.querySelector('.title-label').innerText;
+	save(filename, JSON.stringify(serialized_tierlist));
+}
+
+function load_tierlist(serialized_tierlist) {
+	document.querySelector('.title-label').innerText = serialized_tierlist.title;
+	for (let key in serialized_tierlist) {
+		if (!TIERS.includes(key)) {
+			continue;
+		}
+
+		for (let img_src of serialized_tierlist[key]) {
+			let img = create_img_with_src(img_src);
+			let tier = document.querySelector(`.tierlist tr.${key}`);
+			if (tier) {
+				let td = document.createElement('td');
+				td.appendChild(img);
+				tier.appendChild(td);
+				if (!tierlist[key]) {
+					tierlist[key] = [];
+				}
+				tierlist[key].push(img);
+			}
+		}
+	}
+}
 
 function end_drag(evt) {
 	dragged_image?.classList.remove("dragged");
@@ -126,15 +207,48 @@ function make_accept_drop(elem) {
 	elem.addEventListener('drop', (evt) => {
 		evt.preventDefault();
 		evt.target.classList.remove('drag-entered');
-		if (dragged_image && evt.target.classList.contains('droppable')) {
-			if (dragged_image.parentNode.tagName.toUpperCase() === 'TD') {
-				dragged_image.parentNode.parentNode.removeChild(dragged_image.parentNode);
-			} else {
-				dragged_image.parentNode.removeChild(dragged_image);
+
+		if (!dragged_image || !evt.target.classList.contains('droppable')) {
+			return;
+		}
+
+		let dragged_image_parent = dragged_image.parentNode;
+		if (dragged_image_parent.tagName.toUpperCase() === 'TD') {
+			// We were already in a tier
+			let containing_tr = dragged_image_parent.parentNode;
+			containing_tr.removeChild(dragged_image_parent);
+
+			let tier_name = retrieve_tier_name(containing_tr);
+			if (tierlist[tier_name]) {
+				let removed_idx = tierlist[tier_name].indexOf(dragged_image);
+				if (removed_idx >= 0) {
+					tierlist[tier_name].splice(removed_idx, 1);
+				}
 			}
-			let td = document.createElement('td');
-			td.appendChild(dragged_image);
-			event.target.appendChild(td);
+		} else {
+			dragged_image_parent.removeChild(dragged_image);
+		}
+		let td = document.createElement('td');
+		td.appendChild(dragged_image);
+		event.target.appendChild(td);
+
+		let tier_name = retrieve_tier_name(event.target);
+		if (tier_name) {
+			if (!tierlist[tier_name]) {
+				tierlist[tier_name] = [];
+			}
+			tierlist[tier_name].push(dragged_image);
 		}
 	});
+}
+
+const TIERS = ['s','a','b','c','d','e','f'];
+
+function retrieve_tier_name(item) {
+	for (let clsname of item.classList) {
+		if (TIERS.includes(clsname)) {
+			return clsname;
+		}
+	}
+	return null;
 }
