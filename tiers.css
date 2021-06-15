@@ -28,7 +28,7 @@ body {
 }
 
 .tierlist {
-	min-width: 80%;
+	width: 80%;
 }
 
 .tierlist th, td {
@@ -40,6 +40,8 @@ body {
 	flex-flow: row;
 	font-size: 30px;
 	font-family: sans-serif;
+	border: 0;
+	padding: 0;
 }
 
 .tierlist tr {
@@ -48,6 +50,7 @@ body {
 	border-right-width: 1px;
 	display: flex;
 	user-select: none;
+	padding-right: 100px;
 }
 
 .last-row {

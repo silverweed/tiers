@@ -92,8 +92,14 @@ function make_accept_drop(elem) {
 		evt.preventDefault();
 		evt.target.classList.remove('drag-entered');
 		if (dragged_image && evt.target.classList.contains('droppable')) {
-			dragged_image.parentNode.removeChild(dragged_image);
-			event.target.appendChild(dragged_image);
+			if (dragged_image.parentNode.tagName.toUpperCase() === 'TD') {
+				dragged_image.parentNode.parentNode.removeChild(dragged_image.parentNode);
+			} else {
+				dragged_image.parentNode.removeChild(dragged_image);
+			}
+			let td = document.createElement('td');
+			td.appendChild(dragged_image);
+			event.target.appendChild(td);
 		}
 	});
 }
