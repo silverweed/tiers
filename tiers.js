@@ -50,10 +50,11 @@ window.addEventListener('load', () => {
 	title_input.addEventListener('change', change_title);
 	title_input.addEventListener('focusout', change_title);
 
-	title_label.addEventListener('click', (evt) => {
-		evt.target.style.display = 'none';
+	document.querySelector('.title').addEventListener('click', (evt) => {
+		title_label.style.display = 'none';
 		title_input.value = title_label.innerText;
 		title_input.style.display = 'inline';
+		title_input.select();
 	});
 
 	document.getElementById('load-img-input').addEventListener('input', (evt) => {

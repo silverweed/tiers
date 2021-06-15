@@ -9,9 +9,7 @@ body {
 	user-select: none;
 	text-align: center;
 	margin-bottom: 20px;
-}
-
-.title-label {
+	min-height: 38px;
 	cursor: pointer;
 }
 
