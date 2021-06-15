@@ -112,11 +112,11 @@ img.draggable {
 	height: 100px;
 }
 
-img.draggable:hover {
+img.draggable:hover, .load-img:hover {
 	filter: brightness(0.6);
 }
 
-img.draggable.dragged {
+img.draggable.dragged, .load-img:active {
 	filter: brightness(0.4);
 }
 
@@ -127,4 +127,8 @@ img.draggable.dragged {
 
 #load-img-input {
 	display: none;
+}
+
+.load-img img {
+	user-select: none;
 }

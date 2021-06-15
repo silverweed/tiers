@@ -4,7 +4,6 @@
     <meta charset='utf-8' lang='en'/>
     <title>Offline TierMaker</title>
     <link rel='stylesheet' href='tiers.css'/>
-    <script src='images.js'></script>
     <script src='tiers.js' async></script>
   </head>
   <body>
@@ -36,17 +35,12 @@
         </tr>
     </table>
     <div class='images'>
-        <!--
-        -- Note: it'd be cool to load images with a button, but
-        -- I'd need to figure out how to do it in js.
-        -- For now let's just use a conf file.
         <div class='load-img'>
             <label for='load-img-input'>
                 <img src='plus.png'/>
             </label>
-            <input id='load-img-input' type='file' accept='image/*'/>
+            <input id='load-img-input' type='file' accept='image/*' multiple/>
         </div>
-        -->
     </div>
   </body>
 </html>

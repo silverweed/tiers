@@ -1,27 +1,30 @@
 'use strict';
 
-/*
-function extract_filename(path) {
-	if (path.substr(0, 12) === "C:\\fakepath\\")
-		return path.substr(12); // modern browser
-	var x;
-	x = path.lastIndexOf('/');
-	if (x >= 0) // Unix-based path
-		return path.substr(x+1);
-	x = path.lastIndexOf('\\');
-	if (x >= 0) // Windows-based path
-		return path.substr(x+1);
-	return path; // just the filename
-}
-
 document.getElementById('load-img-input').addEventListener('input', (evt) => {
-	console.log(extract_filename(evt.target.value));
+	// @Speed: maybe we can do some async stuff to optimize this
+	let images = document.querySelector('.images');
+	for (let file of evt.target.files) {
+		let reader = new FileReader();
+		reader.addEventListener('load', (load_evt) => {
+			let img = document.createElement('img');
+			img.src = load_evt.target.result;
+			img.style.userSelect = 'none';
+			img.classList.add('draggable');
+			img.draggable = true;
+			img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
+			img.addEventListener('mousedown', (evt) => {
+				dragged_image = evt.target;
+				dragged_image.classList.add("dragged");
+			});
+			images.appendChild(img);
+		});
+		reader.readAsDataURL(file);
+	}
 });
-*/
 
 let dragged_image;
 
-window.addEventListener('load', () => {
+function load_images() {
 	let fragment = new DocumentFragment();
 	for (let img_name of IMAGES) {
 		let img = document.createElement('img');
@@ -39,6 +42,10 @@ window.addEventListener('load', () => {
 
 	let images = document.querySelector('.images');
 	images.appendChild(fragment);
+}
+
+window.addEventListener('load', () => {
+	//load_images();
 
 	document.querySelectorAll('.tierlist tr').forEach(make_accept_drop);
 	make_accept_drop(document.querySelector('.images'));
