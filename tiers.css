@@ -100,7 +100,7 @@ body {
 	max-height: 200px;
 	overflow-y: auto;
 	overflow-x: wrap;
-	width: 90%;
+	width: 80%;
 	margin-top: 20px;
 	flex-wrap: wrap;
 }
@@ -115,24 +115,15 @@ img.draggable {
 	height: 100px;
 }
 
-img.draggable:hover, .load-img:hover {
+img.draggable:hover, .button:hover {
 	filter: brightness(0.6);
 }
 
-img.draggable.dragged, .load-img:active {
+img.draggable.dragged, .button:active {
 	filter: brightness(0.4);
 }
 
-.load-img {
-	border: 0px;
-	height: 100px;
-}
-
-#load-img-input {
-	display: none;
-}
-
-.load-img img {
+.button img {
 	user-select: none;
 }
 
@@ -143,6 +134,17 @@ img.draggable.dragged, .load-img:active {
 	margin-top: 20px;
 }
 
+.bottom-container input {
+	border: 0;
+	padding: 0;
+	display: none;
+}
+
 .bottom-container > div {
 	margin: 0;
+}
+
+.button {
+	border: 1px solid #666;
+	height: 100px;
 }

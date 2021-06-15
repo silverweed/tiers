@@ -1,27 +1,5 @@
 'use strict';
 
-document.getElementById('load-img-input').addEventListener('input', (evt) => {
-	// @Speed: maybe we can do some async stuff to optimize this
-	let images = document.querySelector('.images');
-	for (let file of evt.target.files) {
-		let reader = new FileReader();
-		reader.addEventListener('load', (load_evt) => {
-			let img = document.createElement('img');
-			img.src = load_evt.target.result;
-			img.style.userSelect = 'none';
-			img.classList.add('draggable');
-			img.draggable = true;
-			img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
-			img.addEventListener('mousedown', (evt) => {
-				dragged_image = evt.target;
-				dragged_image.classList.add("dragged");
-			});
-			images.appendChild(img);
-		});
-		reader.readAsDataURL(file);
-	}
-});
-
 let dragged_image;
 
 function load_images() {
@@ -41,6 +19,17 @@ function load_images() {
 
 	let images = document.querySelector('.images');
 	images.appendChild(fragment);
+}
+
+function reset_list() {
+	document.querySelectorAll('.tierlist td').forEach((item) => {
+		let images = document.querySelector('.images');
+		for (let i = 0; i < item.children.length; ++i) {
+			let img = item.children[i];
+			item.removeChild(img);
+			images.appendChild(img);
+		}
+	});
 }
 
 window.addEventListener('load', () => {
@@ -65,6 +54,34 @@ window.addEventListener('load', () => {
 		evt.target.style.display = 'none';
 		title_input.value = title_label.innerText;
 		title_input.style.display = 'inline';
+	});
+
+	document.getElementById('load-img-input').addEventListener('input', (evt) => {
+		// @Speed: maybe we can do some async stuff to optimize this
+		let images = document.querySelector('.images');
+		for (let file of evt.target.files) {
+			let reader = new FileReader();
+			reader.addEventListener('load', (load_evt) => {
+				let img = document.createElement('img');
+				img.src = load_evt.target.result;
+				img.style.userSelect = 'none';
+				img.classList.add('draggable');
+				img.draggable = true;
+				img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
+				img.addEventListener('mousedown', (evt) => {
+					dragged_image = evt.target;
+					dragged_image.classList.add("dragged");
+				});
+				images.appendChild(img);
+			});
+			reader.readAsDataURL(file);
+		}
+	});
+
+	document.getElementById('reset-list-input').addEventListener('click', () => {
+		if (confirm('Reset Tierlist? (this will place all images back in the pool)')) {
+			reset_list();
+		}
 	});
 });
 
