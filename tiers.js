@@ -39,6 +39,27 @@ window.addEventListener('load', () => {
 
 	let images = document.querySelector('.images');
 	images.appendChild(fragment);
+
+	document.querySelectorAll('.tierlist tr').forEach(make_accept_drop);
+	make_accept_drop(document.querySelector('.images'));
+
+	let title_label = document.querySelector('.title-label');
+	let title_input = document.getElementById('title-input');
+	
+	function change_title(evt) {
+		title_input.style.display = 'none';
+		title_label.innerText = title_input.value;
+		title_label.style.display = 'inline';
+	}
+
+	title_input.addEventListener('change', change_title);
+	title_input.addEventListener('focusout', change_title);
+
+	title_label.addEventListener('click', (evt) => {
+		evt.target.style.display = 'none';
+		title_input.value = title_label.innerText;
+		title_input.style.display = 'inline';
+	});
 });
 
 function end_drag(evt) {
@@ -70,6 +91,3 @@ function make_accept_drop(elem) {
 		}
 	});
 }
-
-document.querySelectorAll('.tierlist tr').forEach(make_accept_drop);
-make_accept_drop(document.querySelector('.images'));
