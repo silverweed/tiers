@@ -13,6 +13,10 @@ body {
 	cursor: pointer;
 }
 
+.title label {
+	cursor: pointer;
+}
+
 .title input {
 	display: none;
 	background: transparent;
