@@ -25,6 +25,11 @@ body {
 	background: #666;
 }
 
+.main-content {
+	display: flex;
+	flex-flow: row;
+}
+
 .tierlist {
 	width: 80%;
 }
@@ -94,13 +99,12 @@ body {
 .images {
 	display: flex;
 	border: 1px solid #666;
-	min-height: 100px;
-	max-height: 200px;
+	height: 200px;
 	overflow-y: auto;
-	overflow-x: wrap;
-	width: 80%;
-	margin-top: 20px;
+	margin-top: 15px;
 	flex-wrap: wrap;
+	flex-grow: 1;
+	width: 100%;
 }
 
 .images.drag-entered {
@@ -127,9 +131,10 @@ img.draggable.dragged, .button:active {
 
 .bottom-container {
 	display: flex;
-	flex-flow: row;
+	flex-flow: column;
 	align-items: center;
-	margin-top: 20px;
+	width: 310px;
+	margin-left: 15px;
 }
 
 .bottom-container input {
@@ -145,4 +150,10 @@ img.draggable.dragged, .button:active {
 .button {
 	border: 1px solid #666;
 	height: 100px;
+}
+
+.buttons-container {
+	display: flex;
+	flex-wrap: wrap;
+	width: 206px;
 }

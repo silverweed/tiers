@@ -11,44 +11,59 @@
         <label class='title-label' for='title-input'>My TierList</label>
         <input type='text' id='title-input' />
     </div>
-    <table class='tierlist'>
-        <tr>
-            <th class='s'>S</th>
-        </tr>
-        <tr>
-            <th class='a'>A</th>
-        </tr>
-        <tr>
-            <th class='b'>B</th>
-        </tr>
-        <tr>
-            <th class='c'>C</th>
-        </tr>
-        <tr>
-            <th class='d'>D</th>
-        </tr>
-        <tr>
-            <th class='e'>E</th>
-        </tr>
-        <tr class='last-row'>
-            <th class='f'>F</th>
-        </tr>
-    </table>
-    <div class='bottom-container'>
-        <div class='images'>
+    <section class='main-content'>
+        <table class='tierlist'>
+            <tr>
+                <th class='s'>S</th>
+            </tr>
+            <tr>
+                <th class='a'>A</th>
+            </tr>
+            <tr>
+                <th class='b'>B</th>
+            </tr>
+            <tr>
+                <th class='c'>C</th>
+            </tr>
+            <tr>
+                <th class='d'>D</th>
+            </tr>
+            <tr>
+                <th class='e'>E</th>
+            </tr>
+            <tr class='last-row'>
+                <th class='f'>F</th>
+            </tr>
+        </table>
+        <div class='bottom-container'>
+            <div class='buttons-container'>
+                <div class='button load-img'>
+                    <label for='load-img-input'>
+                        <img src='plus.png' title='Add images'/>
+                    </label>
+                    <input id='load-img-input' type='file' accept='image/*' multiple/>
+                </div>
+                <div class='button'>
+                    <label for='reset-list-input'>
+                        <img src='reset.png' title='Reset list'>
+                    </label>
+                    <input id='reset-list-input' type='button' />
+                </div>
+                <div class='button'>
+                    <label for='export'>
+                        <img src='export.png' title='Export'>
+                    </label>
+                    <input id='export-input' type='button' />
+                </div>
+                <div class='button'>
+                    <label for='import'>
+                        <img src='import.png' title='Import'>
+                    </label>
+                    <input id='import-input' type='button' />
+                </div>
+            </div>
+            <section class='images'></section>
         </div>
-        <div class='button load-img'>
-            <label for='load-img-input'>
-                <img src='plus.png' title='Add images'/>
-            </label>
-            <input id='load-img-input' type='file' accept='image/*' multiple/>
-        </div>
-        <div class='button'>
-            <label for='reset-list-input'>
-                <img src='reset.png' title='Reset list'>
-            </label>
-            <input id='reset-list-input' type='button' />
-        </div>
-    </div>
+    </section>
   </body>
 </html>
