@@ -173,7 +173,8 @@ function load_tierlist(serialized_tierlist) {
 				let td = document.createElement('span');
 				td.classList.add('item');
 				td.appendChild(img);
-				tier.appendChild(td);
+				let items_container = tier.querySelector('.items');
+				items_container.appendChild(td);
 				if (!tierlist[key]) {
 					tierlist[key] = [];
 				}
