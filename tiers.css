@@ -38,12 +38,11 @@ body {
 	width: 80%;
 }
 
-.tierlist th, td {
-	width: 100px;
-	height: 100px;
+.tierlist span {
+	min-width: 100px;
+	min-height: 100px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
 	flex-flow: row;
 	font-size: 30px;
 	font-family: sans-serif;
@@ -51,53 +50,70 @@ body {
 	padding: 0;
 }
 
-.tierlist tr {
+.tierlist div.row {
 	border: 0px solid #666;
 	border-top-width: 1px;
 	border-right-width: 1px;
 	display: flex;
 	user-select: none;
-	padding-right: 100px;
 }
 
 .last-row {
 	border-bottom-width: 1px !important;
 }
 
-.tierlist tr:hover {
+.tierlist div.row:hover {
 	background-color: #666;
 }
 
-.tierlist tr.drag-entered {
+.tierlist div.row.drag-entered {
 	background-color: #888;
 }
 
-.s th {
+span.header {
+	justify-content: center;
+	align-self: stretch;
+}
+
+.s span.header {
 	background: #ff6666;
 }
 
-.a th {
+.a span.header {
 	background: #f0a731;
 }
 
-.b th {
+.b span.header {
 	background: #f4d95b;
 }
 
-.c th {
+.c span.header {
 	background: #66ff66;
 }
 
-.d th {
+.d span.header {
 	background: #58c8f4;
 }
 
-.e th {
+.e span.header {
 	background: #5b76f4;
 }
 
-.f th {
+.f span.header {
 	background: #f45bed;
+}
+
+span.items {
+	display: flex;
+	flex-wrap: wrap;
+	flex-grow: 1;
+	justify-content: left;
+	pointer-events: none;
+	height: fit-content;
+}
+
+span.item {
+	pointer-events: auto;
 }
 
 .images {

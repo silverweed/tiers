@@ -42,7 +42,7 @@ function load_images() {
 }
 
 function reset_list(clear_images = false) {
-	document.querySelectorAll('.tierlist td').forEach((item) => {
+	document.querySelectorAll('.tierlist span.item').forEach((item) => {
 		let images = document.querySelector('.images');
 		for (let i = 0; i < item.children.length; ++i) {
 			let img = item.children[i];
@@ -57,9 +57,7 @@ function reset_list(clear_images = false) {
 }
 
 window.addEventListener('load', () => {
-	//load_images();
-
-	document.querySelectorAll('.tierlist tr').forEach(make_accept_drop);
+	document.querySelectorAll('.tierlist div.row').forEach(make_accept_drop);
 	make_accept_drop(document.querySelector('.images'));
 
 	let title_label = document.querySelector('.title-label');
@@ -170,9 +168,10 @@ function load_tierlist(serialized_tierlist) {
 
 		for (let img_src of serialized_tierlist[key]) {
 			let img = create_img_with_src(img_src);
-			let tier = document.querySelector(`.tierlist tr.${key}`);
+			let tier = document.querySelector(`.tierlist div.row.${key}`);
 			if (tier) {
-				let td = document.createElement('td');
+				let td = document.createElement('span');
+				td.classList.add('item');
 				td.appendChild(img);
 				tier.appendChild(td);
 				if (!tierlist[key]) {
@@ -208,12 +207,12 @@ function make_accept_drop(elem) {
 		evt.preventDefault();
 		evt.target.classList.remove('drag-entered');
 
-		if (!dragged_image || !evt.target.classList.contains('droppable')) {
+		if (!dragged_image) {
 			return;
 		}
 
 		let dragged_image_parent = dragged_image.parentNode;
-		if (dragged_image_parent.tagName.toUpperCase() === 'TD') {
+		if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' && dragged_image_parent.classList.contains('item')) {
 			// We were already in a tier
 			let containing_tr = dragged_image_parent.parentNode;
 			containing_tr.removeChild(dragged_image_parent);
@@ -228,11 +227,13 @@ function make_accept_drop(elem) {
 		} else {
 			dragged_image_parent.removeChild(dragged_image);
 		}
-		let td = document.createElement('td');
+		let td = document.createElement('span');
+		td.classList.add('item');
 		td.appendChild(dragged_image);
-		event.target.appendChild(td);
+		let items_container = elem.querySelector('.items');
+		items_container.appendChild(td);
 
-		let tier_name = retrieve_tier_name(event.target);
+		let tier_name = retrieve_tier_name(elem);
 		if (tier_name) {
 			if (!tierlist[tier_name]) {
 				tierlist[tier_name] = [];
