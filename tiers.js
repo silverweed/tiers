@@ -17,8 +17,13 @@
 
 'use strict';
 
+const MAX_NAME_LEN = 200;
+
 // Use to serialize the tier list
 let tierlist = {};
+// Contains [[header, input, label]]
+let all_headers = [];
+let headers_orig_min_width;
 
 let dragged_image;
 
@@ -136,11 +141,17 @@ function save(filename, text) {
 
 function save_tierlist(filename) {
 	let serialized_tierlist = {};
-	for (let key in tierlist) {
+	for (let key of TIERS) {
+		serialized_tierlist[key] = {
+			'name': document.querySelector(`.tierlist .${key}`).querySelector('label').innerText.substr(0, MAX_NAME_LEN)
+		};
 		let imgs = tierlist[key];
-		serialized_tierlist[key] = imgs.map(img => img.src);
+		if (imgs) {
+			serialized_tierlist[key].imgs = imgs.map(img => img.src);
+		}
 	}
 	serialized_tierlist.title = document.querySelector('.title-label').innerText;
+
 	save(filename, JSON.stringify(serialized_tierlist));
 }
 
@@ -151,22 +162,28 @@ function load_tierlist(serialized_tierlist) {
 			continue;
 		}
 
-		for (let img_src of serialized_tierlist[key]) {
-			let img = create_img_with_src(img_src);
-			let tier = document.querySelector(`.tierlist div.row.${key}`);
-			if (tier) {
-				let td = document.createElement('span');
-				td.classList.add('item');
-				td.appendChild(img);
-				let items_container = tier.querySelector('.items');
-				items_container.appendChild(td);
-				if (!tierlist[key]) {
-					tierlist[key] = [];
-				}
-				tierlist[key].push(img);
-			}
+		let tier = document.querySelector(`.tierlist .${key}`);
+		if (!tier) {
+			continue;
 		}
+
+		for (let img_src of serialized_tierlist[key].imgs ?? []) {
+			let img = create_img_with_src(img_src);
+			let td = document.createElement('span');
+			td.classList.add('item');
+			td.appendChild(img);
+			let items_container = tier.querySelector('.items');
+			items_container.appendChild(td);
+			if (!tierlist[key]) {
+				tierlist[key] = [];
+			}
+			tierlist[key].push(img);
+		}
+
+		tier.querySelector('label').innerText = serialized_tierlist[key].name;
 	}
+
+	resize_headers();
 }
 
 function end_drag(evt) {
@@ -252,7 +269,7 @@ function enable_edit_on_click(container, input, label) {
 
 	container.addEventListener('click', (evt) => {
 		label.style.display = 'none';
-		input.value = label.innerText;
+		input.value = label.innerText.substr(0, MAX_NAME_LEN);
 		input.style.display = 'inline';
 		input.select();
 	});
@@ -267,7 +284,7 @@ function bind_title_events() {
 }
 
 function create_tiers_label_inputs() {
-	let all_headers = [];
+	all_headers = [];
 	document.querySelectorAll('.row').forEach((row) => {
 		let tier_name = '';
 		for (let tier of TIERS) {
@@ -293,18 +310,20 @@ function create_tiers_label_inputs() {
 		enable_edit_on_click(header, input, label);
 	});
 
-	let min_width = all_headers[0][0].clientWidth;
+	headers_orig_min_width = all_headers[0][0].clientWidth;
 	for (let [_h, input, _l] of all_headers) {
-		input.addEventListener('change', () => {
-			let max_width = min_width;
-			for (let [other_header, _i, label] of all_headers) {
-				max_width = Math.max(max_width, label.clientWidth);
-			}
-
-			for (let [other_header, _i2, _l2] of all_headers) {
-				other_header.style.minWidth = `${max_width}px`;
-			}
-		});
+		input.addEventListener('change', resize_headers);
 	}
 }
 
+
+function resize_headers() {
+	let max_width = headers_orig_min_width;
+	for (let [other_header, _i, label] of all_headers) {
+		max_width = Math.max(max_width, label.clientWidth);
+	}
+
+	for (let [other_header, _i2, _l2] of all_headers) {
+		other_header.style.minWidth = `${max_width}px`;
+	}
+}
