@@ -76,6 +76,10 @@ span.header {
 	cursor: pointer;
 }
 
+span.header label {
+	cursor: pointer;
+}
+
 span.header input[type=text] {
 	display: none;
 	height: 50px;
