@@ -21,30 +21,14 @@ const MAX_NAME_LEN = 200;
 
 // Use to serialize the tier list
 let tierlist = {};
+
+let unsaved_changes = false;
+
 // Contains [[header, input, label]]
 let all_headers = [];
 let headers_orig_min_width;
 
 let dragged_image;
-
-function load_images() {
-	let fragment = new DocumentFragment();
-	for (let img_name of IMAGES) {
-		let img = document.createElement('img');
-		img.src = img_name;
-		img.style.userSelect = 'none';
-		img.classList.add('draggable');
-		img.draggable = true;
-		img.addEventListener('mousedown', (evt) => {
-			dragged_image = evt.target;
-			dragged_image.classList.add("dragged");
-		});
-		fragment.appendChild(img);
-	}
-
-	let images = document.querySelector('.images');
-	images.appendChild(fragment);
-}
 
 function reset_list(clear_images = false) {
 	document.querySelectorAll('.tierlist span.item').forEach((item) => {
@@ -59,6 +43,7 @@ function reset_list(clear_images = false) {
 		item.parentNode.removeChild(item);
 	});
 	tierlist = {};
+	unsaved_changes = true;
 }
 
 window.addEventListener('load', () => {
@@ -77,6 +62,7 @@ window.addEventListener('load', () => {
 			reader.addEventListener('load', (load_evt) => {
 				let img = create_img_with_src(load_evt.target.result);
 				images.appendChild(img);
+				unsaved_changes = true;
 			});
 			reader.readAsDataURL(file);
 		}
@@ -113,6 +99,13 @@ window.addEventListener('load', () => {
 		});
 		reader.readAsText(file);
 	});
+
+	window.addEventListener('beforeunload', (evt) => {
+		if (!unsaved_changes) return null;
+		var msg = "You have unsaved changes. Leave anyway?";
+		(evt || window.event).returnValue = msg;
+		return msg;
+	});
 });
 
 function create_img_with_src(src) {
@@ -130,6 +123,8 @@ function create_img_with_src(src) {
 }
 
 function save(filename, text) {
+	unsaved_changes = false;
+
 	var el = document.createElement('a');
 	el.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(text));
 	el.setAttribute('download', filename);
@@ -151,6 +146,14 @@ function save_tierlist(filename) {
 		}
 	}
 	serialized_tierlist.title = document.querySelector('.title-label').innerText;
+	
+	let untiered_imgs = document.querySelectorAll('.images img');
+	if (untiered_imgs.length > 0) {
+		serialized_tierlist.untiered = [];
+		untiered_imgs.forEach((img) => {
+			serialized_tierlist.untiered.push(img.src);
+		});
+	}
 
 	save(filename, JSON.stringify(serialized_tierlist));
 }
@@ -183,7 +186,17 @@ function load_tierlist(serialized_tierlist) {
 		tier.querySelector('label').innerText = serialized_tierlist[key].name;
 	}
 
+	if (serialized_tierlist.untiered) {
+		let images = document.querySelector('.images');
+		for (let img_src of serialized_tierlist.untiered) {
+			let img = create_img_with_src(img_src);
+			images.appendChild(img);
+		}
+	}
+
 	resize_headers();
+	
+	unsaved_changes = false;
 }
 
 function end_drag(evt) {
@@ -242,6 +255,7 @@ function make_accept_drop(elem) {
 				tierlist[tier_name] = [];
 			}
 			tierlist[tier_name].push(dragged_image);
+			unsaved_changes = true;
 		}
 	});
 }
@@ -262,6 +276,7 @@ function enable_edit_on_click(container, input, label) {
 		input.style.display = 'none';
 		label.innerText = input.value;
 		label.style.display = 'inline';
+		unsaved_changes = true;
 	}
 
 	input.addEventListener('change', change_label);

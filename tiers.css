@@ -185,3 +185,10 @@ img.draggable.dragged, .button:active {
 	flex-wrap: wrap;
 	width: 206px;
 }
+
+.gh-link {
+	position: absolute;
+	top: 5px;
+	color: #ccc;
+	text-decoration: none;
+}
