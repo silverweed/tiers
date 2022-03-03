@@ -73,6 +73,14 @@ body {
 span.header {
 	justify-content: center;
 	align-self: stretch;
+	cursor: pointer;
+}
+
+span.header input[type=text] {
+	display: none;
+	height: 50px;
+	font-size: 30px;
+	text-align: center;
 }
 
 .s span.header {

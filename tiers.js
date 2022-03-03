@@ -60,24 +60,9 @@ window.addEventListener('load', () => {
 	document.querySelectorAll('.tierlist div.row').forEach(make_accept_drop);
 	make_accept_drop(document.querySelector('.images'));
 
-	let title_label = document.querySelector('.title-label');
-	let title_input = document.getElementById('title-input');
+	bind_title_events();
 
-	function change_title(evt) {
-		title_input.style.display = 'none';
-		title_label.innerText = title_input.value;
-		title_label.style.display = 'inline';
-	}
-
-	title_input.addEventListener('change', change_title);
-	title_input.addEventListener('focusout', change_title);
-
-	document.querySelector('.title').addEventListener('click', (evt) => {
-		title_label.style.display = 'none';
-		title_input.value = title_label.innerText;
-		title_input.style.display = 'inline';
-		title_input.select();
-	});
+	create_tiers_label_inputs();
 
 	document.getElementById('load-img-input').addEventListener('input', (evt) => {
 		// @Speed: maybe we can do some async stuff to optimize this
@@ -254,3 +239,72 @@ function retrieve_tier_name(item) {
 	}
 	return null;
 }
+
+function enable_edit_on_click(container, input, label) {
+	function change_label(evt) {
+		input.style.display = 'none';
+		label.innerText = input.value;
+		label.style.display = 'inline';
+	}
+
+	input.addEventListener('change', change_label);
+	input.addEventListener('focusout', change_label);
+
+	container.addEventListener('click', (evt) => {
+		label.style.display = 'none';
+		input.value = label.innerText;
+		input.style.display = 'inline';
+		input.select();
+	});
+}
+
+function bind_title_events() {
+	let title_label = document.querySelector('.title-label');
+	let title_input = document.getElementById('title-input');
+	let title = document.querySelector('.title');
+
+	enable_edit_on_click(title, title_input, title_label);
+}
+
+function create_tiers_label_inputs() {
+	let all_headers = [];
+	document.querySelectorAll('.row').forEach((row) => {
+		let tier_name = '';
+		for (let tier of TIERS) {
+			if (row.classList.contains(tier)) {
+				tier_name = tier;
+				break;
+			}
+		}
+		console.assert(tier_name.length > 0, "We have an element of class .row which is not any of the known tiers!");
+
+		let input = document.createElement('input');
+		input.id = `input-tier-${tier_name}`;
+		input.type = 'text';
+		let label = document.createElement('label');
+		label.htmlFor = input.id;
+		label.innerText = tier_name.toUpperCase();
+
+		let header = row.querySelector('.header');
+		all_headers.push([header, input, label]);
+		header.appendChild(label);
+		header.appendChild(input);
+		
+		enable_edit_on_click(header, input, label);
+	});
+
+	let min_width = all_headers[0][0].clientWidth;
+	for (let [_h, input, _l] of all_headers) {
+		input.addEventListener('change', () => {
+			let max_width = min_width;
+			for (let [other_header, _i, label] of all_headers) {
+				max_width = Math.max(max_width, label.clientWidth);
+			}
+
+			for (let [other_header, _i2, _l2] of all_headers) {
+				other_header.style.minWidth = `${max_width}px`;
+			}
+		});
+	}
+}
+
