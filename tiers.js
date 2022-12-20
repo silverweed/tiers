@@ -15,9 +15,23 @@
 'use strict';
 
 const MAX_NAME_LEN = 200;
+const DEFAULT_TIERS = ['S','A','B','C','D','E','F'];
 
-// Use to serialize the tier list
-let tierlist = {};
+// {
+//    rows: [{
+//       elem: [row Object],
+//       name: "row name",
+//       imgs: [img src]
+//    }]
+//
+//    title: "tierlist title"
+// }
+let tierlist = {
+	rows: [],
+	title: "",
+};
+
+let tierlist_div;
 
 let unsaved_changes = false;
 
@@ -39,13 +53,18 @@ function reset_list(clear_images = false) {
 		}
 		item.parentNode.removeChild(item);
 	});
-	tierlist = {};
+	tierlist = {
+		rows: [],
+		title: "",
+	};
 	unsaved_changes = true;
 }
 
 window.addEventListener('load', () => {
-	for (let tier of TIERS)
-		add_row(tier);
+	tierlist_div =  document.querySelector('.tierlist');
+
+	for (let i = 0; i < DEFAULT_TIERS.length; ++i)
+		add_row(i, DEFAULT_TIERS[i]);
 
 	document.querySelectorAll('.tierlist div.row').forEach(make_accept_drop);
 	make_accept_drop(document.querySelector('.images'));
@@ -135,17 +154,21 @@ function save(filename, text) {
 }
 
 function save_tierlist(filename) {
-	let serialized_tierlist = {};
-	for (let key of TIERS) {
-		serialized_tierlist[key] = {
-			'name': document.querySelector(`.tierlist .${key}`).querySelector('label').innerText.substr(0, MAX_NAME_LEN)
-		};
-		let imgs = tierlist[key];
+	let serialized_tierlist = {
+		title: document.querySelector('.title-label').innerText,
+		rows: [],
+	};
+	for (let i = 0; i < tierlist.rows.length; ++i) {
+		let row = tierlist.rows[i];
+		serialized_tierlist.rows.push({
+			name: row.name,
+			//document.querySelector(`.tierlist .${key}`).querySelector('label').innerText.substr(0, MAX_NAME_LEN)
+		});
+		let imgs = row.imgs;
 		if (imgs) {
-			serialized_tierlist[key].imgs = imgs.map(img => img.src);
+			serialized_tierlist.rows[i].imgs = imgs.map(img => img.src);
 		}
 	}
-	serialized_tierlist.title = document.querySelector('.title-label').innerText;
 
 	let untiered_imgs = document.querySelectorAll('.images img');
 	if (untiered_imgs.length > 0) {
@@ -160,30 +183,34 @@ function save_tierlist(filename) {
 
 function load_tierlist(serialized_tierlist) {
 	document.querySelector('.title-label').innerText = serialized_tierlist.title;
-	for (let key in serialized_tierlist) {
-		if (!TIERS.includes(key)) {
+	for (let i = 0; i < serialized_tierlist.rows.length; ++i)
+		add_row(i, serialized_tierlist.rows[i].name);
+
+	for (let idx in serialized_tierlist.rows) {
+		let elem = tierlist.rows[idx]?.elem;
+		if (!elem) {
 			continue;
 		}
 
-		let tier = document.querySelector(`.tierlist .${key}`);
-		if (!tier) {
-			continue;
-		}
+		let ser_row = serialized_tierlist.rows[idx];
 
-		for (let img_src of serialized_tierlist[key].imgs ?? []) {
+		for (let img_src of ser_row.imgs ?? []) {
 			let img = create_img_with_src(img_src);
 			let td = document.createElement('span');
 			td.classList.add('item');
 			td.appendChild(img);
 			let items_container = tier.querySelector('.items');
 			items_container.appendChild(td);
-			if (!tierlist[key]) {
-				tierlist[key] = [];
+			if (!tierlist.rows[key]) {
+				tierlist.rows[key] = {
+					name: ser_row.name,
+					imgs: []
+				};
 			}
-			tierlist[key].push(img);
+			tierlist.rows[key].imgs.push(img);
 		}
 
-		tier.querySelector('label').innerText = serialized_tierlist[key].name;
+		tier.querySelector('label').innerText = ser_row.name;
 	}
 
 	if (serialized_tierlist.untiered) {
@@ -228,16 +255,19 @@ function make_accept_drop(elem) {
 		}
 
 		let dragged_image_parent = dragged_image.parentNode;
-		if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' && dragged_image_parent.classList.contains('item')) {
+		if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' &&
+				dragged_image_parent.classList.contains('item')) {
 			// We were already in a tier
 			let containing_tr = dragged_image_parent.parentNode;
 			containing_tr.removeChild(dragged_image_parent);
 
-			let tier_name = retrieve_tier_name(containing_tr);
-			if (tierlist[tier_name]) {
-				let removed_idx = tierlist[tier_name].indexOf(dragged_image);
+			let row = retrieve_row(containing_tr.parentNode);
+			if (row) {
+				console.log("old row: ", row);
+				let removed_idx = row.imgs.indexOf(dragged_image);
+				console.log("rm idx: ", removed_idx);
 				if (removed_idx >= 0) {
-					tierlist[tier_name].splice(removed_idx, 1);
+					row.imgs.splice(removed_idx, 1);
 				}
 			}
 		} else {
@@ -247,25 +277,24 @@ function make_accept_drop(elem) {
 		td.classList.add('item');
 		td.appendChild(dragged_image);
 		let items_container = elem.querySelector('.items');
+		if (!items_container) {
+			// Quite lazy hack for <section class='images'>
+			items_container = elem;
+		}
 		items_container.appendChild(td);
 
-		let tier_name = retrieve_tier_name(elem);
-		if (tier_name) {
-			if (!tierlist[tier_name]) {
-				tierlist[tier_name] = [];
-			}
-			tierlist[tier_name].push(dragged_image);
+		let row = retrieve_row(elem);
+		if (row) {
+			row.imgs.push(dragged_image);
 			unsaved_changes = true;
 		}
 	});
 }
 
-const TIERS = ['s','a','b','c','d','e','f'];
-
-function retrieve_tier_name(item) {
-	for (let clsname of item.classList) {
-		if (TIERS.includes(clsname)) {
-			return clsname;
+function retrieve_row(elem) {
+	for (let row of tierlist.rows) {
+		if (row.elem === elem) {
+			return row;
 		}
 	}
 	return null;
@@ -302,7 +331,7 @@ function create_tiers_label_inputs() {
 	all_headers = [];
 	document.querySelectorAll('.row').forEach((row) => {
 		let tier_name = '';
-		for (let tier of TIERS) {
+		for (let tier of DEFAULT_TIERS) {
 			if (row.classList.contains(tier)) {
 				tier_name = tier;
 				break;
@@ -343,23 +372,25 @@ function resize_headers() {
 	}
 }
 
-function add_row(subclass) {
+function add_row(index, subclass) {
 	let div = document.createElement('div');
 	let header = document.createElement('span');
 	let items = document.createElement('span');
 	div.classList.add('row');
-	div.classList.add(subclass);
+	div.classList.add(subclass.toLowerCase()); // TODO
 	header.classList.add('header');
 	items.classList.add('items');
 	div.appendChild(header);
 	div.appendChild(items);
-	/*
 	let row_buttons = document.createElement('div');
 	row_buttons.classList.add('row-buttons');
 	let btn_plus_up = document.createElement('input');
 	btn_plus_up.type = "button";
 	btn_plus_up.value = '+';
 	btn_plus_up.title = "Add row above";
+	btn_plus_up.addEventListener('clicked', (event) => {
+
+	});
 	let btn_rm = document.createElement('input');
 	btn_rm.type = "button";
 	btn_rm.value = '-';
@@ -372,8 +403,20 @@ function add_row(subclass) {
 	row_buttons.appendChild(btn_rm);
 	row_buttons.appendChild(btn_plus_down);
 	div.appendChild(row_buttons);
-	*/
-	document.querySelector('.tierlist').appendChild(div);
+
+	let rows = tierlist_div.childNodes;
+	if (index === rows.length) {
+		tierlist_div.appendChild(div);
+	} else {
+		let nxt_child = rows[index];
+		tierlist_div.insertBefore(div, nxt_child);
+	}
+
+	tierlist.rows.splice(index, 0, {
+		elem: div,
+		name: subclass,
+		imgs: []
+	});
 }
 
 
