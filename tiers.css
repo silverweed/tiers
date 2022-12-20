@@ -58,7 +58,7 @@ body {
 	user-select: none;
 }
 
-.last-row {
+.tierlist div:last-child {
 	border-bottom-width: 1px !important;
 }
 
@@ -182,6 +182,13 @@ img.draggable.dragged, .button:active {
 .button {
 	border: 1px solid #666;
 	height: 100px;
+}
+
+.row-buttons {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: space-evenly;
 }
 
 .buttons-container {

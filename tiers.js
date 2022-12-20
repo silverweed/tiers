@@ -2,12 +2,12 @@
 	Offline Tierlist Maker
 	Copyright (C) 2022  silverweed
 
- Everyone is permitted to copy and distribute verbatim or modified 
- copies of this license document, and changing it is allowed as long 
- as the name is changed. 
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
 
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. You just DO WHAT THE FUCK YOU WANT TO.
 */
@@ -44,6 +44,9 @@ function reset_list(clear_images = false) {
 }
 
 window.addEventListener('load', () => {
+	for (let tier of TIERS)
+		add_row(tier);
+
 	document.querySelectorAll('.tierlist div.row').forEach(make_accept_drop);
 	make_accept_drop(document.querySelector('.images'));
 
@@ -143,7 +146,7 @@ function save_tierlist(filename) {
 		}
 	}
 	serialized_tierlist.title = document.querySelector('.title-label').innerText;
-	
+
 	let untiered_imgs = document.querySelectorAll('.images img');
 	if (untiered_imgs.length > 0) {
 		serialized_tierlist.untiered = [];
@@ -192,7 +195,7 @@ function load_tierlist(serialized_tierlist) {
 	}
 
 	resize_headers();
-	
+
 	unsaved_changes = false;
 }
 
@@ -318,7 +321,7 @@ function create_tiers_label_inputs() {
 		all_headers.push([header, input, label]);
 		header.appendChild(label);
 		header.appendChild(input);
-		
+
 		enable_edit_on_click(header, input, label);
 	});
 
@@ -339,3 +342,38 @@ function resize_headers() {
 		other_header.style.minWidth = `${max_width}px`;
 	}
 }
+
+function add_row(subclass) {
+	let div = document.createElement('div');
+	let header = document.createElement('span');
+	let items = document.createElement('span');
+	div.classList.add('row');
+	div.classList.add(subclass);
+	header.classList.add('header');
+	items.classList.add('items');
+	div.appendChild(header);
+	div.appendChild(items);
+	/*
+	let row_buttons = document.createElement('div');
+	row_buttons.classList.add('row-buttons');
+	let btn_plus_up = document.createElement('input');
+	btn_plus_up.type = "button";
+	btn_plus_up.value = '+';
+	btn_plus_up.title = "Add row above";
+	let btn_rm = document.createElement('input');
+	btn_rm.type = "button";
+	btn_rm.value = '-';
+	btn_rm.title = "Remove row";
+	let btn_plus_down = document.createElement('input');
+	btn_plus_down.type = "button";
+	btn_plus_down.value = '+';
+	btn_plus_down.title = "Add row below";
+	row_buttons.appendChild(btn_plus_up);
+	row_buttons.appendChild(btn_rm);
+	row_buttons.appendChild(btn_plus_down);
+	div.appendChild(row_buttons);
+	*/
+	document.querySelector('.tierlist').appendChild(div);
+}
+
+
