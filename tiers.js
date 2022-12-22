@@ -18,14 +18,16 @@ const MAX_NAME_LEN = 200;
 const DEFAULT_TIERS = ['S','A','B','C','D','E','F'];
 const TIER_COLORS = [
 	// from S to F
-	0xff6666,
-	0xf0a731,
-	0xf4d95b,
-	0x66ff66,
-	0x58c8f4,
-	0x5b76f4,
-	0xf45bed
+	'#ff6666',
+	'#f0a731',
+	'#f4d95b',
+	'#66ff66',
+	'#58c8f4',
+	'#5b76f4',
+	'#f45bed'
 ];
+
+let unique_id = 0;
 
 // {
 //    rows: [{
@@ -47,40 +49,51 @@ let unsaved_changes = false;
 let all_headers = [];
 let headers_orig_min_width;
 
+let images_section
 let tierlist_div;
 let dragged_image;
 
-function reset_list(clear_images = false) {
-	document.querySelectorAll('.tierlist span.item').forEach((item) => {
-		let images = document.querySelector('.images');
+function reset_row(row) {
+	row.querySelectorAll('span.item').forEach((item) => {
 		for (let i = 0; i < item.children.length; ++i) {
 			let img = item.children[i];
 			item.removeChild(img);
-			if (!clear_images) {
-				images.appendChild(img);
-			}
+			images_section.appendChild(img);
 		}
 		item.parentNode.removeChild(item);
 	});
-	tierlist = {
-		rows: [],
-		title: "",
-	};
+}
+
+// Removes all rows from the tierlist, alongside their content.
+function hard_reset_list() {
+	tierlist_div.innerHTML = '';
+	tierlist.rows = [];
+	unsaved_changes = true;
+}
+
+// Places back all the tierlist content into the untiered pool.
+function soft_reset_list() {
+	tierlist_div.querySelectorAll('.row').forEach((row) => reset_row(row));
+	for (let row of tierlist.rows) {
+		row.imgs = [];
+	}
 	unsaved_changes = true;
 }
 
 window.addEventListener('load', () => {
+	images_section =  document.querySelector('.images');
 	tierlist_div =  document.querySelector('.tierlist');
 
-	for (let i = 0; i < DEFAULT_TIERS.length; ++i)
-		add_row(i, DEFAULT_TIERS[i]);
+	for (let i = 0; i < DEFAULT_TIERS.length; ++i) {
+		add_row(i, DEFAULT_TIERS[i], true);
+	}
+	recompute_header_colors();
 
-	document.querySelectorAll('.tierlist div.row').forEach(make_accept_drop);
+	headers_orig_min_width = all_headers[0][0].clientWidth;
+
 	make_accept_drop(document.querySelector('.images'));
 
 	bind_title_events();
-
-	create_tiers_label_inputs();
 
 	document.getElementById('load-img-input').addEventListener('input', (evt) => {
 		// @Speed: maybe we can do some async stuff to optimize this
@@ -98,7 +111,7 @@ window.addEventListener('load', () => {
 
 	document.getElementById('reset-list-input').addEventListener('click', () => {
 		if (confirm('Reset Tierlist? (this will place all images back in the pool)')) {
-			reset_list();
+			soft_reset_list();
 		}
 	});
 
@@ -122,7 +135,7 @@ window.addEventListener('load', () => {
 				alert("Failed to parse data");
 				return;
 			}
-			reset_list(true);
+			hard_reset_list();
 			load_tierlist(parsed);
 		});
 		reader.readAsText(file);
@@ -192,8 +205,10 @@ function save_tierlist(filename) {
 
 function load_tierlist(serialized_tierlist) {
 	document.querySelector('.title-label').innerText = serialized_tierlist.title;
-	for (let i = 0; i < serialized_tierlist.rows.length; ++i)
+	for (let i = 0; i < serialized_tierlist.rows.length; ++i) {
 		add_row(i, serialized_tierlist.rows[i].name);
+	}
+	recompute_header_colors();
 
 	for (let idx in serialized_tierlist.rows) {
 		let elem = tierlist.rows[idx]?.elem;
@@ -208,18 +223,18 @@ function load_tierlist(serialized_tierlist) {
 			let td = document.createElement('span');
 			td.classList.add('item');
 			td.appendChild(img);
-			let items_container = tier.querySelector('.items');
+			let items_container = elem.querySelector('.items');
 			items_container.appendChild(td);
-			if (!tierlist.rows[key]) {
-				tierlist.rows[key] = {
+			if (!tierlist.rows[idx]) {
+				tierlist.rows[idx] = {
 					name: ser_row.name,
 					imgs: []
 				};
 			}
-			tierlist.rows[key].imgs.push(img);
+			tierlist.rows[idx].imgs.push(img);
 		}
 
-		tier.querySelector('label').innerText = ser_row.name;
+		elem.querySelector('label').innerText = ser_row.name;
 	}
 
 	if (serialized_tierlist.untiered) {
@@ -309,11 +324,14 @@ function retrieve_row(elem) {
 	return null;
 }
 
-function enable_edit_on_click(container, input, label) {
+function enable_edit_on_click(container, input, label, row_idx = null) {
 	function change_label(evt) {
 		input.style.display = 'none';
 		label.innerText = input.value;
 		label.style.display = 'inline';
+		if (row_idx !== null) {
+			tierlist.rows[row_idx].name = input.value;
+		}
 		unsaved_changes = true;
 	}
 
@@ -336,33 +354,25 @@ function bind_title_events() {
 	enable_edit_on_click(title, title_input, title_label);
 }
 
-function create_tiers_label_inputs() {
-	all_headers = [];
-	document.querySelectorAll('.row').forEach((row, row_idx) => {
-		console.assert(row_idx < DEFAULT_TIERS.length, `row_idx is ${row_idx} but n default tiers is ${DEFAULT_TIERS.length}!`);
+function create_label_input(row, row_idx, is_default) {
+	let input = document.createElement('input');
+	input.id = `input-tier-${unique_id++}`;
+	input.type = 'text';
+	input.addEventListener('change', resize_headers);
+	let label = document.createElement('label');
+	label.htmlFor = input.id;
 
-		let tier_name = DEFAULT_TIERS[row_idx];
-		let input = document.createElement('input');
-		input.id = `input-tier-${tier_name}`;
-		input.type = 'text';
-		let label = document.createElement('label');
-		label.htmlFor = input.id;
-		label.innerText = tier_name.toUpperCase();
-
-		let header = row.querySelector('.header');
-		all_headers.push([header, input, label]);
-		header.appendChild(label);
-		header.appendChild(input);
-
-		enable_edit_on_click(header, input, label);
-	});
-
-	headers_orig_min_width = all_headers[0][0].clientWidth;
-	for (let [_h, input, _l] of all_headers) {
-		input.addEventListener('change', resize_headers);
+	if (is_default) {
+		label.innerText = DEFAULT_TIERS[row_idx];
 	}
-}
 
+	let header = row.querySelector('.header');
+	all_headers.splice(row_idx, 0, [header, input, label]);
+	header.appendChild(label);
+	header.appendChild(input);
+
+	enable_edit_on_click(header, input, label, row_idx);
+}
 
 function resize_headers() {
 	let max_width = headers_orig_min_width;
@@ -375,14 +385,12 @@ function resize_headers() {
 	}
 }
 
-function add_row(index, name) {
+function add_row(index, name, is_default = false) {
 	let div = document.createElement('div');
 	let header = document.createElement('span');
 	let items = document.createElement('span');
 	div.classList.add('row');
-	let color = TIER_COLORS[index];
 	header.classList.add('header');
-	header.style.backgroundColor = `#${color.toString(16)}`;
 	items.classList.add('items');
 	div.appendChild(header);
 	div.appendChild(items);
@@ -392,23 +400,51 @@ function add_row(index, name) {
 	btn_plus_up.type = "button";
 	btn_plus_up.value = '+';
 	btn_plus_up.title = "Add row above";
-	btn_plus_up.addEventListener('clicked', (event) => {
-
+	btn_plus_up.addEventListener('click', (evt) => {
+		let parent_div = evt.target.parentNode.parentNode;
+		let rows = Array.from(tierlist_div.children);
+		let idx = rows.indexOf(parent_div);
+		console.assert(idx >= 0);
+		add_row(idx, name);
+		recompute_header_colors();
 	});
 	let btn_rm = document.createElement('input');
 	btn_rm.type = "button";
 	btn_rm.value = '-';
 	btn_rm.title = "Remove row";
+	btn_rm.addEventListener('click', (evt) => {
+		if (tierlist.rows.length < 2) return;
+		let parent_div = evt.target.parentNode.parentNode;
+		let rows = Array.from(tierlist_div.children);
+		let idx = rows.indexOf(parent_div);
+		console.assert(idx >= 0);
+		if (tierlist.rows[idx].imgs.length === 0) {
+			rm_row(idx);
+		} else {
+			if (confirm(`Remove tier ${tierlist.rows[idx].name}? (This will move back all its content to the untiered pool)`)) {
+				rm_row(idx);
+			}
+		}
+		recompute_header_colors();
+	});
 	let btn_plus_down = document.createElement('input');
 	btn_plus_down.type = "button";
 	btn_plus_down.value = '+';
 	btn_plus_down.title = "Add row below";
+	btn_plus_down.addEventListener('click', (evt) => {
+		let parent_div = evt.target.parentNode.parentNode;
+		let rows = Array.from(tierlist_div.children);
+		let idx = rows.indexOf(parent_div);
+		console.assert(idx >= 0);
+		add_row(idx + 1, name);
+		recompute_header_colors();
+	});
 	row_buttons.appendChild(btn_plus_up);
 	row_buttons.appendChild(btn_rm);
 	row_buttons.appendChild(btn_plus_down);
 	div.appendChild(row_buttons);
 
-	let rows = tierlist_div.childNodes;
+	let rows = tierlist_div.children;
 	if (index === rows.length) {
 		tierlist_div.appendChild(div);
 	} else {
@@ -420,6 +456,23 @@ function add_row(index, name) {
 		elem: div,
 		name: name,
 		imgs: []
+	});
+
+	make_accept_drop(div);
+	create_label_input(div, index, is_default);
+}
+
+function rm_row(idx) {
+	let row = tierlist_div.children[idx];
+	reset_row(row);
+	tierlist_div.removeChild(row);
+	tierlist.rows.splice(idx, 1);
+}
+
+function recompute_header_colors() {
+	tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
+		let color = TIER_COLORS[row_idx % TIER_COLORS.length];
+		row.querySelector('.header').style.backgroundColor = color;
 	});
 }
 
