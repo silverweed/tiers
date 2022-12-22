@@ -16,6 +16,16 @@
 
 const MAX_NAME_LEN = 200;
 const DEFAULT_TIERS = ['S','A','B','C','D','E','F'];
+const TIER_COLORS = [
+	// from S to F
+	0xff6666,
+	0xf0a731,
+	0xf4d95b,
+	0x66ff66,
+	0x58c8f4,
+	0x5b76f4,
+	0xf45bed
+];
 
 // {
 //    rows: [{
@@ -31,14 +41,13 @@ let tierlist = {
 	title: "",
 };
 
-let tierlist_div;
-
 let unsaved_changes = false;
 
 // Contains [[header, input, label]]
 let all_headers = [];
 let headers_orig_min_width;
 
+let tierlist_div;
 let dragged_image;
 
 function reset_list(clear_images = false) {
@@ -329,16 +338,10 @@ function bind_title_events() {
 
 function create_tiers_label_inputs() {
 	all_headers = [];
-	document.querySelectorAll('.row').forEach((row) => {
-		let tier_name = '';
-		for (let tier of DEFAULT_TIERS) {
-			if (row.classList.contains(tier)) {
-				tier_name = tier;
-				break;
-			}
-		}
-		console.assert(tier_name.length > 0, "We have an element of class .row which is not any of the known tiers!");
+	document.querySelectorAll('.row').forEach((row, row_idx) => {
+		console.assert(row_idx < DEFAULT_TIERS.length, `row_idx is ${row_idx} but n default tiers is ${DEFAULT_TIERS.length}!`);
 
+		let tier_name = DEFAULT_TIERS[row_idx];
 		let input = document.createElement('input');
 		input.id = `input-tier-${tier_name}`;
 		input.type = 'text';
@@ -372,13 +375,14 @@ function resize_headers() {
 	}
 }
 
-function add_row(index, subclass) {
+function add_row(index, name) {
 	let div = document.createElement('div');
 	let header = document.createElement('span');
 	let items = document.createElement('span');
 	div.classList.add('row');
-	div.classList.add(subclass.toLowerCase()); // TODO
+	let color = TIER_COLORS[index];
 	header.classList.add('header');
+	header.style.backgroundColor = `#${color.toString(16)}`;
 	items.classList.add('items');
 	div.appendChild(header);
 	div.appendChild(items);
@@ -414,7 +418,7 @@ function add_row(index, subclass) {
 
 	tierlist.rows.splice(index, 0, {
 		elem: div,
-		name: subclass,
+		name: name,
 		imgs: []
 	});
 }

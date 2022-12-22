@@ -87,34 +87,6 @@ span.header input[type=text] {
 	text-align: center;
 }
 
-.s span.header {
-	background: #ff6666;
-}
-
-.a span.header {
-	background: #f0a731;
-}
-
-.b span.header {
-	background: #f4d95b;
-}
-
-.c span.header {
-	background: #66ff66;
-}
-
-.d span.header {
-	background: #58c8f4;
-}
-
-.e span.header {
-	background: #5b76f4;
-}
-
-.f span.header {
-	background: #f45bed;
-}
-
 span.items {
 	display: flex;
 	flex-wrap: wrap;
@@ -189,6 +161,13 @@ img.draggable.dragged, .button:active {
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-evenly;
+	opacity: 0.2;
+	transition: 200ms linear;
+}
+
+.row-buttons:hover {
+	opacity: 1;
+	transition: 200ms linear;
 }
 
 .buttons-container {
