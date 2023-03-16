@@ -125,6 +125,8 @@ window.addEventListener('load', () => {
 		reader.readAsText(file);
 	});
 
+	bind_trash_events();
+
 	window.addEventListener('beforeunload', (evt) => {
 		if (!unsaved_changes) return null;
 		var msg = "You have unsaved changes. Leave anyway?";
@@ -404,5 +406,36 @@ function recompute_header_colors() {
 	tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
 		let color = TIER_COLORS[row_idx % TIER_COLORS.length];
 		row.querySelector('.header').style.backgroundColor = color;
+	});
+}
+
+function bind_trash_events() {
+	let trash = document.getElementById('trash');
+	trash.classList.add('droppable');
+	trash.addEventListener('dragenter', (evt) => {
+		evt.preventDefault();
+		evt.target.src = 'trash_bin_open.png';
+	});
+	trash.addEventListener('dragexit', (evt) => {
+		evt.preventDefault();
+		evt.target.src = 'trash_bin.png';
+	});
+	trash.addEventListener('dragover', (evt) => {
+		evt.preventDefault();
+	});
+	trash.addEventListener('drop', (evt) => {
+		evt.preventDefault();
+		evt.target.src = 'trash_bin.png';
+		if (dragged_image) {
+			let dragged_image_parent = dragged_image.parentNode;
+			if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' &&
+					dragged_image_parent.classList.contains('item'))
+			{
+				// We were already in a tier
+				let containing_tr = dragged_image_parent.parentNode;
+				containing_tr.removeChild(dragged_image_parent);
+			}
+			dragged_image.remove();
+		}
 	});
 }

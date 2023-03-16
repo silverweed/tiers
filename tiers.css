@@ -183,3 +183,15 @@ img.draggable.dragged, .button:active {
 	color: #ccc;
 	text-decoration: none;
 }
+
+#trash {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+	height: 80px;
+	opacity: 0.4;
+}
+
+#trash:hover {
+	opacity: 1;
+}
