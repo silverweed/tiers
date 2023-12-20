@@ -105,7 +105,6 @@ span.item {
 	border: 1px solid #666;
 	height: 200px;
 	overflow-y: auto;
-	margin-top: 15px;
 	flex-wrap: wrap;
 	flex-grow: 1;
 	width: 100%;
@@ -194,4 +193,10 @@ img.draggable.dragged, .button:active {
 
 #trash:hover {
 	opacity: 1;
+}
+
+.hint {
+	font-style: italic;
+	font-size: small;
+	color: #ccc;
 }
