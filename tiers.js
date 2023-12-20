@@ -93,6 +93,25 @@ window.addEventListener('load', () => {
 		}
 	});
 
+	// Allow copy-pasting image from clipboard
+	document.onpaste = (evt) => {
+		let clip_data = evt.clipboardData || evt.originalEvent.clipboardData;
+		let items = clip_data.items;
+		let images = document.querySelector('.images');
+		for (let item of items) {
+			if (item.kind === 'file') {
+				let blob = item.getAsFile();
+				let reader = new FileReader();
+				reader.onload = (load_evt) => {
+					let img = create_img_with_src(load_evt.target.result);
+					images.appendChild(img);
+					unsaved_changes = true;
+				};
+				reader.readAsDataURL(blob);
+			}
+		}
+	};
+
 	document.getElementById('reset-list-input').addEventListener('click', () => {
 		if (confirm('Reset Tierlist? (this will place all images back in the pool)')) {
 			soft_reset_list();
