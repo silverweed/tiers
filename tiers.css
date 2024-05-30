@@ -31,11 +31,7 @@ body {
 
 .main-content {
 	display: flex;
-	flex-flow: row;
-}
-
-.tierlist {
-	width: 80%;
+	flex-flow: column;
 }
 
 .tierlist span {
@@ -135,10 +131,9 @@ img.draggable.dragged, .button:active {
 
 .bottom-container {
 	display: flex;
-	flex-flow: column;
+	flex-flow: row;
 	align-items: center;
-	width: 310px;
-	margin-left: 15px;
+	margin-top: 15px;
 }
 
 .bottom-container input {
@@ -173,7 +168,7 @@ img.draggable.dragged, .button:active {
 .buttons-container {
 	display: flex;
 	flex-wrap: wrap;
-	width: 206px;
+	width: 270px;
 }
 
 .gh-link {
@@ -185,9 +180,9 @@ img.draggable.dragged, .button:active {
 
 #trash {
 	position: absolute;
-	bottom: 5px;
+	top: 5px;
 	right: 5px;
-	height: 80px;
+	height: 60px;
 	opacity: 0.4;
 }
 
