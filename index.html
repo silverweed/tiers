@@ -15,37 +15,47 @@
     <section class='main-content'>
         <div class='tierlist'>
         </div>
-        <div class='bottom-container'>
-            <div class='buttons-container'>
-                <div class='button'>
-                    <label for='load-img-input'>
-                        <img src='plus.png' title='Add images'/>
-                    </label>
-                    <input id='load-img-input' type='file' accept='image/*' multiple/>
+        <div class='toggleable-container'>
+            <div class='bottom-container'>
+                <div class='buttons-container'>
+                    <div class='button'>
+                        <label for='load-img-input'>
+                            <img src='plus.png' title='Add images'/>
+                        </label>
+                        <input id='load-img-input' type='file' accept='image/*' multiple/>
+                    </div>
+                    <div class='button'>
+                        <label for='reset-list-input'>
+                            <img src='reset.png' title='Reset list'>
+                        </label>
+                        <input id='reset-list-input' type='button' />
+                    </div>
+                    <div class='button'>
+                        <label for='export-input'>
+                            <img src='export.png' title='Export'>
+                        </label>
+                        <input id='export-input' type='button' />
+                    </div>
+                    <div class='button'>
+                        <label for='import-input'>
+                            <img src='import.png' title='Import'/>
+                        </label>
+                        <input id='import-input' type='file' accept='.json' multiple/>
+                    </div>
                 </div>
-                <div class='button'>
-                    <label for='reset-list-input'>
-                        <img src='reset.png' title='Reset list'>
-                    </label>
-                    <input id='reset-list-input' type='button' />
-                </div>
-                <div class='button'>
-                    <label for='export-input'>
-                        <img src='export.png' title='Export'>
-                    </label>
-                    <input id='export-input' type='button' />
-                </div>
-                <div class='button'>
-                    <label for='import-input'>
-                        <img src='import.png' title='Import'/>
-                    </label>
-                    <input id='import-input' type='file' accept='.json' multiple/>
-                </div>
+                <section class='images'></section>
             </div>
-            <section class='images'></section>
+            <p class='hint'>Hint: you can paste an image into this page to have it show up in the image list.</p>
         </div>
-        <p class='hint'>Hint: you can paste an image into this page to have it show up in the image list.</p>
     </section>
-    <img id='trash' src='trash_bin.png' title='Delete image (drag it over here)'></img>
+    <div class="top-container">
+        <img id='trash' src='trash_bin.png' title='Delete image (drag it over here)'></img>
+        <div class='button'>
+            <label for='toggle-layout'>
+                <img src='toggle_layout.png' title='Toggle Layout'/>
+            </label>
+            <input id='toggle-layout' type='button'/>
+        </div>
+    </div>
   </body>
 </html>

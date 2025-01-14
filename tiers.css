@@ -34,6 +34,20 @@ body {
 	flex-flow: column;
 }
 
+.main-content.vertical {
+	flex-flow: row !important;
+}
+
+.vertical .tierlist {
+	width: 80%;
+}
+
+.toggleable-container {
+	display: flex;
+	flex-flow: column;
+	flex-grow: 1;
+}
+
 .tierlist span {
 	min-width: 100px;
 	min-height: 100px;
@@ -134,6 +148,13 @@ img.draggable.dragged, .button:active {
 	flex-flow: row;
 	align-items: center;
 	margin-top: 15px;
+	flex-grow: 1;
+}
+
+.vertical .bottom-container {
+	flex-flow: column !important;
+	margin-left: 15px;
+	margin-top: 0px !important;
 }
 
 .bottom-container input {
@@ -171,6 +192,10 @@ img.draggable.dragged, .button:active {
 	width: 270px;
 }
 
+.vertical .buttons-container {
+	justify-content: center;
+}
+
 .gh-link {
 	position: absolute;
 	top: 5px;
@@ -178,11 +203,31 @@ img.draggable.dragged, .button:active {
 	text-decoration: none;
 }
 
-#trash {
+.top-container {
 	position: absolute;
 	top: 5px;
 	right: 5px;
 	height: 60px;
+	display: flex;
+	flex-flow: row;
+}
+
+.top-container * {
+	height: 100%;
+	overflow: hidden;
+	margin: 0;
+	padding-left: 5px;
+	padding-right: 5px;
+	border: 0;
+}
+
+.top-container input {
+	border: 0;
+	padding: 0;
+	display: none;
+}
+
+#trash {
 	opacity: 0.4;
 }
 
@@ -194,4 +239,5 @@ img.draggable.dragged, .button:active {
 	font-style: italic;
 	font-size: small;
 	color: #ccc;
+	padding: 0px 10px;
 }

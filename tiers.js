@@ -31,6 +31,10 @@ let unique_id = 0;
 
 let unsaved_changes = false;
 
+const LAYOUT_HORIZONTAL = 0;
+const LAYOUT_VERTICAL = 1;
+let cur_layout = LAYOUT_HORIZONTAL;
+
 // Contains [[header, input, label]]
 let all_headers = [];
 let headers_orig_min_width;
@@ -145,6 +149,7 @@ window.addEventListener('load', () => {
 	});
 
 	bind_trash_events();
+	bind_toggle_layout_events();
 
 	window.addEventListener('beforeunload', (evt) => {
 		if (!unsaved_changes) return null;
@@ -457,4 +462,21 @@ function bind_trash_events() {
 			dragged_image.remove();
 		}
 	});
+}
+
+function bind_toggle_layout_events() {
+	let toggle = document.getElementById('toggle-layout');
+	toggle.addEventListener('click', () => {
+		set_layout((cur_layout + 1) % 2);
+	});
+}
+
+function set_layout(layout) {
+	let main = document.getElementsByClassName("main-content")[0];
+	if (layout === LAYOUT_VERTICAL) {
+		main.classList.add("vertical");
+	} else {
+		main.classList.remove("vertical");
+	}
+	cur_layout = layout;
 }
