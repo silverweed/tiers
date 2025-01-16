@@ -12,9 +12,11 @@ You can play with the latest version at [silverweed.github.io/tiers](https://sil
 - Customize the tier names
 - Customize the number of tiers
 - Export your tierlist as JSON and reimport it even from another PC (image data is embedded in the save file). Please consider that this tierlist maker currently does NOT rescale or process the images in any way, so the save file's size will strongly depend on how large are your input images. Avoid uploading too many huge images or the whole app may slow down. In the future I may add thumbnailing capabilities, but for now I'd rather keep it simple. 
+- Import back your tierlist from JSON, either by manually loading it through the Import button or from a remote file. To import a remote tierlist file, use the query parameter `?url=http://url/of/your_tierlist.json` (to avoid issues with special characters in the URL it's advisable to [URL-encode](https://www.urlencoder.io/) it).
 
 If you'd like to propose any feature, feel free to open a PR. I probably won't have time to follow issues closely or add much stuff myself though.
 
 ### Using this Tierlist Maker
 
 You are allowed to use this Tierlist Maker however you wish (including YouTube videos, images, memes, embedding it in your website, etc).
+
