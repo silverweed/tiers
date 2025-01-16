@@ -157,6 +157,8 @@ window.addEventListener('load', () => {
 		(evt || window.event).returnValue = msg;
 		return msg;
 	});
+
+	void try_load_tierlist_json();
 });
 
 function create_img_with_src(src) {
@@ -479,4 +481,26 @@ function set_layout(layout) {
 		main.classList.remove("vertical");
 	}
 	cur_layout = layout;
+}
+
+function is_url (str) {
+	try {
+		new URL(str);
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
+
+// Fetches a tierlist JSON file from the 'url' query parameter and loads it
+async function try_load_tierlist_json () {
+	const load_from_url = new URLSearchParams(window.location.search).get('url');
+	if (load_from_url !== null && is_url(load_from_url)) {
+		try {
+			let result = await fetch(load_from_url);
+			result = await result.json();
+			hard_reset_list();
+			load_tierlist(result);
+		} catch (e) { console.error(e); }
+	}
 }
