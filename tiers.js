@@ -335,7 +335,7 @@ function make_accept_drop(elem) {
 		}
 		
 		// Checks if the item is moving within the same row
-		// Used as a fix along with new_item_index to ensure the item is placed to the left of the target
+		// Used as a fix along with target_item_index to ensure the item is placed to the left of the target
 		// For example: Without this, on the same row, moving an item from index 2 -> 5 will place the item
 		// to the right of the image (target item). This will ensure the image will always be to the left
 		// of the target.
