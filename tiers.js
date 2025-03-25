@@ -161,6 +161,8 @@ window.addEventListener('load', () => {
 	void try_load_tierlist_json();
 });
 
+let old_item_index;
+
 function create_img_with_src(src) {
 	let img = document.createElement('img');
 	img.src = src;
@@ -171,6 +173,21 @@ function create_img_with_src(src) {
 	img.addEventListener('mousedown', (evt) => {
 		dragged_image = evt.target;
 		dragged_image.classList.add("dragged");
+
+	    // Grabs the index of the item's original placement prior to being dragged.
+		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
+		let parent_div = dragged_image.parentNode.parentNode.parentNode;
+		let idx = rows.indexOf(parent_div);
+	
+		if (rows[idx] != undefined) {
+		  let image_node_list_count = rows[idx].querySelectorAll("img").length;
+		  let image_node_list = rows[idx].querySelectorAll("img");
+		  for (let i = 0; i < image_node_list_count; i++) {
+			if (image_node_list[i] == dragged_image) {
+			  old_item_index = i;
+			}
+		  }
+		}
 	});
 	return img;
 }
@@ -256,8 +273,28 @@ window.addEventListener('dragend', end_drag);
 function make_accept_drop(elem) {
 	elem.classList.add('droppable');
 
+  let target_item_index;
+  let drag_enter_img;
+
 	elem.addEventListener('dragenter', (evt) => {
 		evt.target.classList.add('drag-entered');
+
+		// Grabs the index of the item that the dragged item is hovering.
+		drag_enter_img = evt.target;
+
+		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
+		let parent_div = drag_enter_img.parentNode.parentNode.parentNode;
+		let idx = rows.indexOf(parent_div);
+	
+		if (rows[idx] != undefined) {
+			let image_node_list_count = rows[idx].querySelectorAll("img").length;
+			let image_node_list = rows[idx].querySelectorAll("img");
+			for (let i = 0; i < image_node_list_count; i++) {
+			if (image_node_list[i] == drag_enter_img) {
+				target_item_index = i;
+			}
+			}
+		}
 	});
 	elem.addEventListener('dragleave', (evt) => {
 		evt.target.classList.remove('drag-entered');
@@ -273,11 +310,17 @@ function make_accept_drop(elem) {
 			return;
 		}
 
+		let old_item_row
+
 		let dragged_image_parent = dragged_image.parentNode;
 		if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' &&
 				dragged_image_parent.classList.contains('item')) {
 			// We were already in a tier
 			let containing_tr = dragged_image_parent.parentNode;
+
+			// This is the same as setting the variable at the start of the grab
+			old_item_row = containing_tr.parentNode;
+
 			containing_tr.removeChild(dragged_image_parent);
 		} else {
 			dragged_image_parent.removeChild(dragged_image);
@@ -290,7 +333,27 @@ function make_accept_drop(elem) {
 			// Quite lazy hack for <section class='images'>
 			items_container = elem;
 		}
-		items_container.appendChild(td);
+		
+		// Checks if the item is moving within the same row
+		// Used as a fix along with new_item_index to ensure the item is placed to the left of the target
+		// For example: Without this, on the same row, moving an item from index 2 -> 5 will place the item
+		// to the right of the image (target item). This will ensure the image will always be to the left
+		// of the target.
+		if (items_container.parentNode == old_item_row &&
+			old_item_index < target_item_index)
+			{
+			// Same row
+			target_item_index = target_item_index - 1;
+		}
+	
+		// Dragged onto the row
+		// Appends the item instead of using the index
+		if (evt.target.classList.contains("row")) {
+			// This is a row
+			items_container.appendChild(td);
+		} else {
+			items_container.insertBefore(td, items_container.children[target_item_index]);
+		}
 
 		unsaved_changes = true;
 	});
