@@ -44,6 +44,9 @@ let untiered_images;
 let tierlist_div;
 let dragged_image;
 
+// Used in drop() logic for placing items within a tier
+let old_item_index;
+
 function reset_row(row) {
 	row.querySelectorAll('span.item').forEach((item) => {
 		for (let i = 0; i < item.children.length; ++i) {
@@ -161,8 +164,6 @@ window.addEventListener('load', () => {
 	void try_load_tierlist_json();
 });
 
-let old_item_index;
-
 function create_img_with_src(src) {
 	let img = document.createElement('img');
 	img.src = src;
@@ -175,19 +176,7 @@ function create_img_with_src(src) {
 		dragged_image.classList.add("dragged");
 
 	    // Grabs the index of the item's original placement prior to being dragged.
-		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
-		let parent_div = dragged_image.parentNode.parentNode.parentNode;
-		let idx = rows.indexOf(parent_div);
-	
-		if (rows[idx] != undefined) {
-		  let image_node_list_count = rows[idx].querySelectorAll("img").length;
-		  let image_node_list = rows[idx].querySelectorAll("img");
-		  for (let i = 0; i < image_node_list_count; i++) {
-			if (image_node_list[i] == dragged_image) {
-			  old_item_index = i;
-			}
-		  }
-		}
+		old_item_index = get_item_index(dragged_image)
 	});
 	return img;
 }
@@ -262,6 +251,26 @@ function load_tierlist(serialized_tierlist) {
 	unsaved_changes = false;
 }
 
+// Returns the supplied item's index within a row
+function get_item_index(elem) {
+	let rows = Array.from(tierlist_div.querySelectorAll(".row"));
+	let parent_div = elem.parentNode.parentNode.parentNode;
+	let idx = rows.indexOf(parent_div);
+	let item_index;
+
+	if (rows[idx] !== undefined) {
+		let image_node_list_count = rows[idx].querySelectorAll("img").length;
+		let image_node_list = rows[idx].querySelectorAll("img");
+		for (let i = 0; i < image_node_list_count; i++) {
+			if (image_node_list[i] == elem) {
+				item_index = i;
+				break;
+			}
+		}
+		return item_index;
+	}
+}
+
 function end_drag(evt) {
 	dragged_image?.classList.remove("dragged");
 	dragged_image = null;
@@ -273,35 +282,25 @@ window.addEventListener('dragend', end_drag);
 function make_accept_drop(elem) {
 	elem.classList.add('droppable');
 
-  let target_item_index;
-  let drag_enter_img;
+  	let target_item_index;
+  	let drag_enter_img;
 
 	elem.addEventListener('dragenter', (evt) => {
-		evt.target.classList.add('drag-entered');
+		drag_enter_img = evt.target;
+		drag_enter_img.classList.add('drag-entered');
 
 		// Grabs the index of the item that the dragged item is hovering.
-		drag_enter_img = evt.target;
-
-		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
-		let parent_div = drag_enter_img.parentNode.parentNode.parentNode;
-		let idx = rows.indexOf(parent_div);
-	
-		if (rows[idx] != undefined) {
-			let image_node_list_count = rows[idx].querySelectorAll("img").length;
-			let image_node_list = rows[idx].querySelectorAll("img");
-			for (let i = 0; i < image_node_list_count; i++) {
-			if (image_node_list[i] == drag_enter_img) {
-				target_item_index = i;
-			}
-			}
-		}
+		target_item_index = get_item_index(drag_enter_img)
 	});
+
 	elem.addEventListener('dragleave', (evt) => {
 		evt.target.classList.remove('drag-entered');
 	});
+
 	elem.addEventListener('dragover', (evt) => {
 		evt.preventDefault();
 	});
+
 	elem.addEventListener('drop', (evt) => {
 		evt.preventDefault();
 		evt.target.classList.remove('drag-entered');
@@ -310,7 +309,7 @@ function make_accept_drop(elem) {
 			return;
 		}
 
-		let old_item_row
+		let old_item_row;
 
 		let dragged_image_parent = dragged_image.parentNode;
 		if (dragged_image_parent.tagName.toUpperCase() === 'SPAN' &&
@@ -339,9 +338,7 @@ function make_accept_drop(elem) {
 		// For example: Without this, on the same row, moving an item from index 2 -> 5 will place the item
 		// to the right of the image (target item). This will ensure the image will always be to the left
 		// of the target.
-		if (items_container.parentNode == old_item_row &&
-			old_item_index < target_item_index)
-			{
+		if (items_container.parentNode == old_item_row && old_item_index < target_item_index){
 			// Same row
 			target_item_index = target_item_index - 1;
 		}
