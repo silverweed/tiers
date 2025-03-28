@@ -256,18 +256,15 @@ function get_item_index(elem) {
 	let rows = Array.from(tierlist_div.querySelectorAll(".row"));
 	let parent_div = elem.parentNode.parentNode.parentNode;
 	let idx = rows.indexOf(parent_div);
-	let item_index;
 
 	if (rows[idx] !== undefined) {
-		let image_node_list_count = rows[idx].querySelectorAll("img").length;
 		let image_node_list = rows[idx].querySelectorAll("img");
-		for (let i = 0; i < image_node_list_count; i++) {
+		for (let i = 0; i < image_node_list.length; i++) {
 			if (image_node_list[i] == elem) {
-				item_index = i;
-				break;
+				return i;
 			}
 		}
-		return item_index;
+		return null;
 	}
 }
 
@@ -338,7 +335,7 @@ function make_accept_drop(elem) {
 		// For example: Without this, on the same row, moving an item from index 2 -> 5 will place the item
 		// to the right of the image (target item). This will ensure the image will always be to the left
 		// of the target.
-		if (items_container.parentNode == old_item_row && old_item_index < target_item_index){
+		if (items_container.parentNode === old_item_row && old_item_index < target_item_index){
 			// Same row
 			target_item_index = target_item_index - 1;
 		}
