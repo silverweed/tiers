@@ -264,8 +264,8 @@ function get_item_index(elem) {
 				return i;
 			}
 		}
-		return null;
 	}
+	return null;
 }
 
 function end_drag(evt) {
