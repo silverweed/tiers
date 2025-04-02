@@ -47,6 +47,9 @@ let dragged_image;
 // Used in drop() logic for placing items within a tier
 let old_item_index;
 
+// Used to add and remove the placement marker
+let placement_marker_div;
+
 function reset_row(row) {
 	row.querySelectorAll('span.item').forEach((item) => {
 		for (let i = 0; i < item.children.length; ++i) {
@@ -268,6 +271,19 @@ function get_item_index(elem) {
 	return null;
 }
 
+// Sets the item placement marker render location
+function set_item_placement_marker_location(elem) {
+	var h_offset = elem.offsetLeft.toString();
+
+	// There is an 8px left margin offset before the tier begins (the blank gap)
+	// This subtraction accounts for that
+	h_offset -= 8;
+	placement_marker_div.style.marginLeft = h_offset + "px";
+
+	var v_offset = elem.offsetTop.toString();
+	placement_marker_div.style.top = v_offset + "px";
+}
+
 function end_drag(evt) {
 	dragged_image?.classList.remove("dragged");
 	dragged_image = null;
@@ -282,12 +298,20 @@ function make_accept_drop(elem) {
   	let target_item_index;
   	let drag_enter_img;
 
+	// Used to add and remove the placement marker
+	placement_marker_div = document.createElement('div');
+	placement_marker_div.classList.add("vl");
+
 	elem.addEventListener('dragenter', (evt) => {
 		drag_enter_img = evt.target;
 		drag_enter_img.classList.add('drag-entered');
 
 		// Grabs the index of the item that the dragged item is hovering.
-		target_item_index = get_item_index(drag_enter_img)
+		target_item_index = get_item_index(drag_enter_img);
+
+		// Sets the location and renders the the placement marker
+		set_item_placement_marker_location(drag_enter_img);
+		document.body.appendChild(placement_marker_div);
 	});
 
 	elem.addEventListener('dragleave', (evt) => {
@@ -348,6 +372,9 @@ function make_accept_drop(elem) {
 		} else {
 			items_container.insertBefore(td, items_container.children[target_item_index]);
 		}
+
+		// Remove the placement marker after drop
+		document.body.removeChild(placement_marker_div);
 
 		unsaved_changes = true;
 	});
