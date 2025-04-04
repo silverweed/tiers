@@ -259,7 +259,6 @@ function get_item_index(elem) {
 	let rows = Array.from(tierlist_div.querySelectorAll(".row"));
 	let parent_div = elem.parentNode.parentNode.parentNode;
 	let idx = rows.indexOf(parent_div);
-
 	if (rows[idx] !== undefined) {
 		let image_node_list = rows[idx].querySelectorAll("img");
 		for (let i = 0; i < image_node_list.length; i++) {
@@ -268,17 +267,36 @@ function get_item_index(elem) {
 			}
 		}
 	}
+	// Bottom images container
+	// Note: images manipulated in the bottom container will have a different parent div after being moved
+	// This accounts for both cases
+	else if (parent_div.classList.contains("bottom-container") || parent_div.classList.contains("toggleable-container")) {
+		let image_node_list = elem.parentNode.parentNode.parentNode.querySelectorAll("img");
+		for (let i = 0; i < image_node_list.length; i++) {
+			if (image_node_list[i] == elem) {
+				// '-4' accounts for the four images in the buttons-container
+				// required as part of the parent div changing for moved items
+				return i - 4;
+			}
+		}
+	}
 	return null;
 }
 
 // Sets the item placement marker render location
-function set_item_placement_marker_location(elem) {
+function set_item_placement_marker_location(elem, is_hovering_row) {
 	var h_offset = elem.offsetLeft.toString();
-
+	
 	// There is an 8px left margin offset before the tier begins (the blank gap)
 	// This subtraction accounts for that
 	h_offset -= 8;
-	placement_marker_div.style.marginLeft = h_offset + "px";
+	if (is_hovering_row){
+		// Moves the vertical line to the right
+		placement_marker_div.style.marginLeft = (h_offset += 100) + "px";
+	}
+	else {
+		placement_marker_div.style.marginLeft = h_offset + "px";
+	}
 
 	var v_offset = elem.offsetTop.toString();
 	placement_marker_div.style.top = v_offset + "px";
@@ -307,10 +325,29 @@ function make_accept_drop(elem) {
 		drag_enter_img.classList.add('drag-entered');
 
 		// Grabs the index of the item that the dragged item is hovering.
+		// Used for placing items within the row
 		target_item_index = get_item_index(drag_enter_img);
 
-		// Sets the location and renders the the placement marker
-		set_item_placement_marker_location(drag_enter_img);
+		// Hovering a row
+		if (drag_enter_img.classList.contains("row") || drag_enter_img.classList.contains("images")){
+			let image_node_list = drag_enter_img.querySelectorAll("img");
+			let last_image = image_node_list[image_node_list.length - 1];
+			
+			if (last_image !== undefined) {
+				// Rows has items
+				set_item_placement_marker_location(last_image, true);
+			}
+			else {
+				// Row is empty
+				set_item_placement_marker_location(drag_enter_img, true);
+			}
+		}
+		// Hovering an item (image)
+		else if (drag_enter_img.classList.contains("draggable")) {
+
+			set_item_placement_marker_location(drag_enter_img, false);
+		}
+
 		document.body.appendChild(placement_marker_div);
 	});
 
