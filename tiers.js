@@ -286,23 +286,47 @@ function get_item_index(elem) {
 // Sets the item placement marker render location
 function set_item_placement_marker_location(elem, is_hovering_row) {
 	var h_offset = elem.offsetLeft.toString();
-	
+	let hovering_empty_bottom_container = false;
+
+	// Hovering an empty bottom container
+	// A normal row and the bottom-container have different marginLeft's
+	// This ensures the marker appears correctly on an empty bottom-container
+	if (elem.parentNode.classList.contains("bottom-container")) {
+		hovering_empty_bottom_container = true;
+	}
+
 	// There is an 8px left margin offset before the tier begins (the blank gap)
 	// This subtraction accounts for that
 	h_offset -= 8;
-	if (is_hovering_row){
+	if (is_hovering_row && !hovering_empty_bottom_container){
 		// Moves the vertical line to the right
-		placement_marker_div.style.marginLeft = (h_offset += 100) + "px";
-	}
-	else {
+		h_offset += 100;
+		placement_marker_div.style.marginLeft = h_offset + "px";
+	} else {
 		placement_marker_div.style.marginLeft = h_offset + "px";
 	}
 
-	var v_offset = elem.offsetTop.toString();
-	placement_marker_div.style.top = v_offset + "px";
+	placement_marker_div.style.top = `${elem.offsetTop}px`;
+}
+
+function pre_calc_row_item_placement_marker_location(image_node_list, drag_enter_img) {
+	let last_image = image_node_list[image_node_list.length - 1];
+	
+	if (last_image !== undefined) {
+		// Rows has items
+		set_item_placement_marker_location(last_image, true);
+	}
+	else {
+		// Row is empty
+		set_item_placement_marker_location(drag_enter_img, true);
+	}
 }
 
 function end_drag(evt) {
+	// Remove the placement marker after valid and invalid drop
+	if (placement_marker_div.parentNode === document.body) {
+		document.body.removeChild(placement_marker_div);
+	}
 	dragged_image?.classList.remove("dragged");
 	dragged_image = null;
 }
@@ -323,7 +347,6 @@ function make_accept_drop(elem) {
 	elem.addEventListener('dragenter', (evt) => {
 		drag_enter_img = evt.target;
 		drag_enter_img.classList.add('drag-entered');
-
 		// Grabs the index of the item that the dragged item is hovering.
 		// Used for placing items within the row
 		target_item_index = get_item_index(drag_enter_img);
@@ -331,16 +354,14 @@ function make_accept_drop(elem) {
 		// Hovering a row
 		if (drag_enter_img.classList.contains("row") || drag_enter_img.classList.contains("images")){
 			let image_node_list = drag_enter_img.querySelectorAll("img");
-			let last_image = image_node_list[image_node_list.length - 1];
-			
-			if (last_image !== undefined) {
-				// Rows has items
-				set_item_placement_marker_location(last_image, true);
-			}
-			else {
-				// Row is empty
-				set_item_placement_marker_location(drag_enter_img, true);
-			}
+
+			pre_calc_row_item_placement_marker_location(image_node_list, drag_enter_img);
+		}
+		// Hovering a row label or header
+		else if (drag_enter_img.parentNode.classList.contains("row")){
+			let image_node_list = drag_enter_img.parentNode.querySelectorAll("img");
+
+			pre_calc_row_item_placement_marker_location(image_node_list, drag_enter_img);
 		}
 		// Hovering an item (image)
 		else if (drag_enter_img.classList.contains("draggable")) {
@@ -409,9 +430,6 @@ function make_accept_drop(elem) {
 		} else {
 			items_container.insertBefore(td, items_container.children[target_item_index]);
 		}
-
-		// Remove the placement marker after drop
-		document.body.removeChild(placement_marker_div);
 
 		unsaved_changes = true;
 	});
