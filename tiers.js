@@ -304,11 +304,10 @@ function set_item_placement_marker_location(elem, is_hovering_row) {
 		let position_info;
 		let row_header = elem.getElementsByClassName("header");
 		row_header = row_header[0];
-		if (row_header !== undefined){
+		if (row_header !== undefined) {
 			// Hovering the row-droppable div
 			position_info = row_header.getBoundingClientRect();
-		}
-		else {
+		} else {
 			// Hovering the row header or header label
 			position_info = elem.getBoundingClientRect();
 		}
