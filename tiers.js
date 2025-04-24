@@ -203,7 +203,8 @@ function save_tierlist(filename) {
 	};
 	tierlist_div.querySelectorAll('.row').forEach((row, i) => {
 		serialized_tierlist.rows.push({
-			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN)
+			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN),
+			color: row.querySelector('.header').style.backgroundColor
 		});
 		serialized_tierlist.rows[i].imgs = [];
 		row.querySelectorAll('img').forEach((img) => {
@@ -238,8 +239,19 @@ function load_tierlist(serialized_tierlist) {
 		}
 
 		elem.querySelector('label').innerText = ser_row.name;
+		// If "color" keys are found in the json, use them for the row header coloring.
+		if (ser_row.color !== undefined){
+			let header = elem.querySelector('.header');
+			header.style.backgroundColor = ser_row.color;
+			let r_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[0];
+			let g_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[1];
+			let b_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[2];
+			header.querySelector('.row-color-picker').value = rgb_to_hex(r_value, g_value, b_value);
+		}
+		else {
+			recompute_header_colors();
+		}
 	}
-	recompute_header_colors();
 
 	if (serialized_tierlist.untiered) {
 		let images = document.querySelector('.images');
@@ -252,6 +264,10 @@ function load_tierlist(serialized_tierlist) {
 	resize_headers();
 
 	unsaved_changes = false;
+}
+
+function rgb_to_hex(r, g, b) {
+	return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
 }
 
 // Returns the supplied item's index within a row
@@ -447,22 +463,37 @@ function make_accept_drop(elem) {
 	});
 }
 
-function enable_edit_on_click(container, input, label) {
+function enable_edit_on_click(container, input, label, row_color_input) {
 	function change_label(evt) {
 		input.style.display = 'none';
 		label.innerText = input.value;
 		label.style.display = 'inline';
+
+		// Prevents exception when this function is called for the title, and not a row
+		if (row_color_input !== undefined) {
+			container.style.backgroundColor = row_color_input.value;
+			row_color_input.style.display = "none";
+		}
+
 		unsaved_changes = true;
 	}
 
 	input.addEventListener('change', change_label);
-	input.addEventListener('focusout', change_label);
 
 	container.addEventListener('click', (evt) => {
-		label.style.display = 'none';
-		input.value = label.innerText.substr(0, MAX_NAME_LEN);
-		input.style.display = 'inline';
-		input.select();
+		// Close the row and apply row edits if the row is open.
+		// Only occurs when the row, is selected.
+		if (evt.target.classList == "header" && input.style.display === 'inline') {
+			change_label();
+		}
+		else {
+			label.style.display = 'none';
+			input.value = label.innerText.substr(0, MAX_NAME_LEN);
+			input.style.display = 'inline';
+			input.select();
+
+			row_color_input.style.display = 'inline';
+		}
 	});
 }
 
@@ -488,7 +519,18 @@ function create_label_input(row, row_idx, row_name) {
 	header.appendChild(label);
 	header.appendChild(input);
 
-	enable_edit_on_click(header, input, label);
+	let row_color_input = document.createElement('input');
+	row_color_input.type = "color";
+	row_color_input.classList.add('row-color-picker');
+	// Defaults to red if no "color" keys are found in the json.
+	row_color_input.value = '#ff0000';
+	row_color_input.style.padding = "0px";
+	row_color_input.style.width = "100px";
+	row_color_input.style.height = "100px";
+	row_color_input.style.display = "none";
+	header.appendChild(row_color_input);
+
+	enable_edit_on_click(header, input, label, row_color_input);
 }
 
 function resize_headers() {
