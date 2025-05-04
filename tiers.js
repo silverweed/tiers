@@ -478,11 +478,20 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 		unsaved_changes = true;
 	}
 
-	input.addEventListener('change', change_label);
+	// Close the header and apply header edits if the row is open.
+	// Only occurs when selecting blank row or image space to the right of the label.
+	// Only closes the latest opened row header.
+	container.addEventListener('focusout', (evt) => {
+		if (evt.explicitOriginalTarget.classList === undefined ||
+			evt.explicitOriginalTarget.classList == "row droppable" ||
+			evt.explicitOriginalTarget.classList.contains('draggable')) {
+			change_label();
+		}
+	});
 
 	container.addEventListener('click', (evt) => {
-		// Close the row and apply row edits if the row is open.
-		// Only occurs when the row, is selected.
+		// Close the header and apply header edits if the header is open.
+		// Only occurs when the header, is selected.
 		if (evt.target.classList == "header" && input.style.display === 'inline') {
 			change_label();
 		}
@@ -490,9 +499,13 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 			label.style.display = 'none';
 			input.value = label.innerText.substr(0, MAX_NAME_LEN);
 			input.style.display = 'inline';
+			input.style.textAlign = "center";
 			input.select();
-
-			row_color_input.style.display = 'inline';
+		
+			// Prevents exception when this function is called for the title, and not a row
+			if (row_color_input !== undefined) {
+				row_color_input.style.display = 'inline';
+			}
 		}
 	});
 }
