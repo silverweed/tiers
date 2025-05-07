@@ -202,9 +202,16 @@ function save_tierlist(filename) {
 		rows: [],
 	};
 	tierlist_div.querySelectorAll('.row').forEach((row, i) => {
+		// Converts and saves the header background color as hex for easy import later.
+		let header = row.querySelector('.header');
+		let r_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[0];
+		let g_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[1];
+		let b_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[2];
+		let color_hex = rgb_to_hex(r_value, g_value, b_value);
+
 		serialized_tierlist.rows.push({
 			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN),
-			color: row.querySelector('.header').style.backgroundColor
+			color: color_hex
 		});
 		serialized_tierlist.rows[i].imgs = [];
 		row.querySelectorAll('img').forEach((img) => {
@@ -240,15 +247,11 @@ function load_tierlist(serialized_tierlist) {
 
 		elem.querySelector('label').innerText = ser_row.name;
 		// If "color" keys are found in the json, use them for the row header coloring.
-		if (ser_row.color !== undefined){
+		if (ser_row.color !== undefined) {
 			let header = elem.querySelector('.header');
 			header.style.backgroundColor = ser_row.color;
-			let r_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[0];
-			let g_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[1];
-			let b_value = ser_row.color.replace(/[^\d,]/g, '').split(',')[2];
-			header.querySelector('.row-color-picker').value = rgb_to_hex(r_value, g_value, b_value);
-		}
-		else {
+			header.querySelector('.row-color-picker').value = ser_row.color;
+		} else {
 			recompute_header_colors();
 		}
 	}
@@ -494,8 +497,7 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 		// Only occurs when the header, is selected.
 		if (evt.target.classList == "header" && input.style.display === 'inline') {
 			change_label();
-		}
-		else {
+		} else {
 			label.style.display = 'none';
 			input.value = label.innerText.substr(0, MAX_NAME_LEN);
 			input.style.display = 'inline';
@@ -535,8 +537,7 @@ function create_label_input(row, row_idx, row_name) {
 	let row_color_input = document.createElement('input');
 	row_color_input.type = "color";
 	row_color_input.classList.add('row-color-picker');
-	// Defaults to red if no "color" keys are found in the json.
-	row_color_input.value = '#ff0000';
+	row_color_input.value = TIER_COLORS[row_idx % TIER_COLORS.length];
 	row_color_input.style.padding = "0px";
 	row_color_input.style.width = "100px";
 	row_color_input.style.height = "100px";
@@ -578,7 +579,7 @@ function add_row(index, name) {
 		let idx = rows.indexOf(parent_div);
 		console.assert(idx >= 0);
 		add_row(idx, '');
-		recompute_header_colors();
+		recompute_header_colors(idx);
 	});
 	let btn_rm = document.createElement('input');
 	btn_rm.type = "button";
@@ -595,7 +596,6 @@ function add_row(index, name) {
 		{
 			rm_row(idx);
 		}
-		recompute_header_colors();
 	});
 	let btn_plus_down = document.createElement('input');
 	btn_plus_down.type = "button";
@@ -607,7 +607,7 @@ function add_row(index, name) {
 		let idx = rows.indexOf(parent_div);
 		console.assert(idx >= 0);
 		add_row(idx + 1, name);
-		recompute_header_colors();
+		recompute_header_colors(idx + 1);
 	});
 	row_buttons.appendChild(btn_plus_up);
 	row_buttons.appendChild(btn_rm);
@@ -634,11 +634,22 @@ function rm_row(idx) {
 	tierlist_div.removeChild(row);
 }
 
-function recompute_header_colors() {
-	tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
-		let color = TIER_COLORS[row_idx % TIER_COLORS.length];
-		row.querySelector('.header').style.backgroundColor = color;
-	});
+function recompute_header_colors(idx) {
+	// Computes the colors for the supplied row index, or if undefined, all the row headers.
+	if (idx === undefined) {
+		tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
+			let color = TIER_COLORS[row_idx % TIER_COLORS.length];
+			let header = row.querySelector('.header');
+			header.style.backgroundColor = color;
+			header.querySelector('.row-color-picker').value = color;
+		});
+	} else {
+		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
+		let color = TIER_COLORS[idx % TIER_COLORS.length];
+		let header = rows[idx].querySelector('.header');
+		header.style.backgroundColor = color;
+		header.querySelector('.row-color-picker').value = color;
+	}
 }
 
 function bind_trash_events() {
