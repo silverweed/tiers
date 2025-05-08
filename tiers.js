@@ -486,7 +486,7 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 	// Only closes the latest opened row header.
 	container.addEventListener('focusout', (evt) => {
 		if (evt.explicitOriginalTarget.classList === undefined ||
-			evt.explicitOriginalTarget.classList == "row droppable" ||
+			evt.explicitOriginalTarget.classList.value === "row droppable" ||
 			evt.explicitOriginalTarget.classList.contains('draggable')) {
 			change_label();
 		}
@@ -495,7 +495,7 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 	container.addEventListener('click', (evt) => {
 		// Close the header and apply header edits if the header is open.
 		// Only occurs when the header, is selected.
-		if (evt.target.classList == "header" && input.style.display === 'inline') {
+		if (evt.target.classList.value === "header" && input.style.display === 'inline') {
 			change_label();
 		} else {
 			label.style.display = 'none';
