@@ -482,12 +482,21 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 	}
 
 	// Close the header and apply header edits if the row is open.
-	// Only occurs when selecting blank row or image space to the right of the label.
-	// Only closes the latest opened row header.
+	let evt_timestamp;
 	container.addEventListener('focusout', (evt) => {
-		if (evt.explicitOriginalTarget.classList === undefined ||
-			evt.explicitOriginalTarget.classList.value === "row droppable" ||
-			evt.explicitOriginalTarget.classList.contains('draggable')) {
+		if (evt.target.classList.value !== "row-color-picker" && evt.relatedTarget !== null) {
+			if (evt.relatedTarget.classList.value === "row-color-picker") {
+				// Do nothing
+				label.innerText = input.value;
+				evt_timestamp = evt.timeStamp;
+			};
+		// Grace period is 200 milliseconds
+		// Required for Firefox as a focusout event exemption
+		// When opening the color picker, an additional focusout event is called
+		// This filters out the event so the header isn't closed
+		} else if (evt.timeStamp <= evt_timestamp + 200) {
+			// Do nothing
+		} else {
 			change_label();
 		}
 	});
