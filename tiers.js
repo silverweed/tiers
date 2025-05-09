@@ -202,8 +202,16 @@ function save_tierlist(filename) {
 		rows: [],
 	};
 	tierlist_div.querySelectorAll('.row').forEach((row, i) => {
+		// Converts and saves the header background color as hex for easy import later.
+		let header = row.querySelector('.header');
+		let r_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[0];
+		let g_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[1];
+		let b_value = header.style.backgroundColor.replace(/[^\d,]/g, '').split(',')[2];
+		let color_hex = rgb_to_hex(r_value, g_value, b_value);
+
 		serialized_tierlist.rows.push({
-			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN)
+			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN),
+			color: color_hex
 		});
 		serialized_tierlist.rows[i].imgs = [];
 		row.querySelectorAll('img').forEach((img) => {
@@ -238,8 +246,15 @@ function load_tierlist(serialized_tierlist) {
 		}
 
 		elem.querySelector('label').innerText = ser_row.name;
+		// If "color" keys are found in the json, use them for the row header coloring.
+		if (ser_row.color !== undefined) {
+			let header = elem.querySelector('.header');
+			header.style.backgroundColor = ser_row.color;
+			header.querySelector('.row-color-picker').value = ser_row.color;
+		} else {
+			recompute_header_colors();
+		}
 	}
-	recompute_header_colors();
 
 	if (serialized_tierlist.untiered) {
 		let images = document.querySelector('.images');
@@ -252,6 +267,10 @@ function load_tierlist(serialized_tierlist) {
 	resize_headers();
 
 	unsaved_changes = false;
+}
+
+function rgb_to_hex(r, g, b) {
+	return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
 }
 
 // Returns the supplied item's index within a row
@@ -447,22 +466,58 @@ function make_accept_drop(elem) {
 	});
 }
 
-function enable_edit_on_click(container, input, label) {
+function enable_edit_on_click(container, input, label, row_color_input) {
 	function change_label(evt) {
 		input.style.display = 'none';
 		label.innerText = input.value;
 		label.style.display = 'inline';
+
+		// Prevents exception when this function is called for the title, and not a row
+		if (row_color_input !== undefined) {
+			container.style.backgroundColor = row_color_input.value;
+			row_color_input.style.display = "none";
+		}
+
 		unsaved_changes = true;
 	}
 
-	input.addEventListener('change', change_label);
-	input.addEventListener('focusout', change_label);
+	// Close the header and apply header edits if the row is open.
+	let evt_timestamp;
+	container.addEventListener('focusout', (evt) => {
+		if (evt.target.classList.value !== "row-color-picker" && evt.relatedTarget !== null) {
+			if (evt.relatedTarget.classList.value === "row-color-picker") {
+				// Do nothing
+				label.innerText = input.value;
+				evt_timestamp = evt.timeStamp;
+			};
+		// Grace period is 200 milliseconds
+		// Required for Firefox as a focusout event exemption
+		// When opening the color picker, an additional focusout event is called
+		// This filters out the event so the header isn't closed
+		} else if (evt.timeStamp <= evt_timestamp + 200) {
+			// Do nothing
+		} else {
+			change_label();
+		}
+	});
 
 	container.addEventListener('click', (evt) => {
-		label.style.display = 'none';
-		input.value = label.innerText.substr(0, MAX_NAME_LEN);
-		input.style.display = 'inline';
-		input.select();
+		// Close the header and apply header edits if the header is open.
+		// Only occurs when the header, is selected.
+		if (evt.target.classList.value === "header" && input.style.display === 'inline') {
+			change_label();
+		} else {
+			label.style.display = 'none';
+			input.value = label.innerText.substr(0, MAX_NAME_LEN);
+			input.style.display = 'inline';
+			input.style.textAlign = "center";
+			input.select();
+		
+			// Prevents exception when this function is called for the title, and not a row
+			if (row_color_input !== undefined) {
+				row_color_input.style.display = 'inline';
+			}
+		}
 	});
 }
 
@@ -488,7 +543,17 @@ function create_label_input(row, row_idx, row_name) {
 	header.appendChild(label);
 	header.appendChild(input);
 
-	enable_edit_on_click(header, input, label);
+	let row_color_input = document.createElement('input');
+	row_color_input.type = "color";
+	row_color_input.classList.add('row-color-picker');
+	row_color_input.value = TIER_COLORS[row_idx % TIER_COLORS.length];
+	row_color_input.style.padding = "0px";
+	row_color_input.style.width = "100px";
+	row_color_input.style.height = "100px";
+	row_color_input.style.display = "none";
+	header.appendChild(row_color_input);
+
+	enable_edit_on_click(header, input, label, row_color_input);
 }
 
 function resize_headers() {
@@ -523,7 +588,7 @@ function add_row(index, name) {
 		let idx = rows.indexOf(parent_div);
 		console.assert(idx >= 0);
 		add_row(idx, '');
-		recompute_header_colors();
+		recompute_header_colors(idx);
 	});
 	let btn_rm = document.createElement('input');
 	btn_rm.type = "button";
@@ -540,7 +605,6 @@ function add_row(index, name) {
 		{
 			rm_row(idx);
 		}
-		recompute_header_colors();
 	});
 	let btn_plus_down = document.createElement('input');
 	btn_plus_down.type = "button";
@@ -552,7 +616,7 @@ function add_row(index, name) {
 		let idx = rows.indexOf(parent_div);
 		console.assert(idx >= 0);
 		add_row(idx + 1, name);
-		recompute_header_colors();
+		recompute_header_colors(idx + 1);
 	});
 	row_buttons.appendChild(btn_plus_up);
 	row_buttons.appendChild(btn_rm);
@@ -579,11 +643,22 @@ function rm_row(idx) {
 	tierlist_div.removeChild(row);
 }
 
-function recompute_header_colors() {
-	tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
-		let color = TIER_COLORS[row_idx % TIER_COLORS.length];
-		row.querySelector('.header').style.backgroundColor = color;
-	});
+function recompute_header_colors(idx) {
+	// Computes the colors for the supplied row index, or if undefined, all the row headers.
+	if (idx === undefined) {
+		tierlist_div.querySelectorAll('.row').forEach((row, row_idx) => {
+			let color = TIER_COLORS[row_idx % TIER_COLORS.length];
+			let header = row.querySelector('.header');
+			header.style.backgroundColor = color;
+			header.querySelector('.row-color-picker').value = color;
+		});
+	} else {
+		let rows = Array.from(tierlist_div.querySelectorAll(".row"));
+		let color = TIER_COLORS[idx % TIER_COLORS.length];
+		let header = rows[idx].querySelector('.header');
+		header.style.backgroundColor = color;
+		header.querySelector('.row-color-picker').value = color;
+	}
 }
 
 function bind_trash_events() {
