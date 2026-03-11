@@ -203,6 +203,10 @@ img.draggable.dragged, .button:active {
 	text-decoration: none;
 }
 
+.gh-logo {
+	width: 40px;
+}
+
 .top-container {
 	position: absolute;
 	top: 5px;
