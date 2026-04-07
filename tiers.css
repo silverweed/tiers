@@ -48,6 +48,10 @@ body {
 	flex-grow: 1;
 }
 
+.vertical .toggleable-container {
+	max-width: 25%;
+}
+
 .tierlist span {
 	min-width: 100px;
 	min-height: 100px;
