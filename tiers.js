@@ -172,6 +172,7 @@ function create_img_with_src(src) {
 	img.src = src;
 	img.style.userSelect = 'none';
 	img.classList.add('draggable');
+	img.classList.add('zoomable');
 	img.draggable = true;
 	img.ondragstart = "event.dataTransfer.setData('text/plain', null)";
 	img.addEventListener('mousedown', (evt) => {
@@ -181,6 +182,13 @@ function create_img_with_src(src) {
 	    // Grabs the index of the item's original placement prior to being dragged.
 		old_item_index = get_item_index(dragged_image)
 	});
+	// Listener for enlarging image
+	img.addEventListener("click", () => {
+		modalImage.src = img.src;
+		modalImage.alt = img.alt;
+		modal.classList.add("visible");
+		document.body.style.overflow = "hidden";
+  	});
 	return img;
 }
 
@@ -730,3 +738,31 @@ async function try_load_tierlist_json () {
 		} catch (e) { console.error(e); }
 	}
 }
+
+// Enlarge image elements
+const modal = document.getElementById("imageModal");
+const modalImage = document.getElementById("modalImage");
+const closeButton = document.getElementById("closeModal");
+
+function closeModal() {
+  	modal.classList.remove("visible");
+  	modalImage.src = "";
+  	document.body.style.overflow = "";
+}
+
+// Close when pressing the X button
+closeButton.addEventListener("click", closeModal);
+
+// Close when clicking the dark background
+modal.addEventListener("click", (evt) => {
+  	if (evt.target === modal) {
+    	closeModal();
+  	}
+});
+
+// Close when pressing Escape
+document.addEventListener("keydown", (evt) => {
+  	if (evt.key === "Escape" && modal.classList.contains("visible")) {
+    	closeModal();
+  	}
+});

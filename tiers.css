@@ -257,3 +257,46 @@ img.draggable.dragged, .button:active {
   	position: absolute;
   	top: 0;
 }
+
+/* Full-screen modal */
+.image-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: zoom-out;
+}
+
+.image-modal.visible {
+  display: flex;
+}
+
+/* Enlarged image */
+.image-modal img {
+  max-width: 95vw;
+  max-height: 90vh;
+  object-fit: contain;
+  cursor: default;
+}
+
+/* Close button */
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  z-index: 1001;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 42px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #ccc;
+}
