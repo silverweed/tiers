@@ -219,6 +219,8 @@ function save_tierlist(filename) {
 	let serialized_tierlist = {
 		title: document.querySelector('.title-label').innerText,
 		rows: [],
+		untiered: [],
+		untiered_names: [],
 	};
 	tierlist_div.querySelectorAll('.row').forEach((row, i) => {
 		// Converts and saves the header background color as hex for easy import later.
@@ -230,19 +232,21 @@ function save_tierlist(filename) {
 
 		serialized_tierlist.rows.push({
 			name: row.querySelector('.header label').innerText.substr(0, MAX_NAME_LEN),
-			color: color_hex
+			color: color_hex,
+			imgs: [],
+			img_names: [],
 		});
-		serialized_tierlist.rows[i].imgs = [];
 		row.querySelectorAll('img').forEach((img) => {
 			serialized_tierlist.rows[i].imgs.push(img.src);
+			serialized_tierlist.rows[i].img_names.push(img.title ?? "");
 		});
 	});
 
 	let untiered_imgs = document.querySelectorAll('.images img');
 	if (untiered_imgs.length > 0) {
-		serialized_tierlist.untiered = [];
 		untiered_imgs.forEach((img) => {
 			serialized_tierlist.untiered.push(img.src);
+			serialized_tierlist.untiered_names.push(img.title ?? "");
 		});
 	}
 
@@ -255,8 +259,12 @@ function load_tierlist(serialized_tierlist) {
 		let ser_row = serialized_tierlist.rows[idx];
 		let elem = add_row(idx, ser_row.name);
 
-		for (let img_src of ser_row.imgs ?? []) {
+		for (let i = 0; i < ser_row.imgs?.length ?? 0; ++i) {
+			let img_src = ser_row.imgs[i];
 			let img = create_img_with_src(img_src);
+			if (ser_row.img_names?.length ?? 0 > i) {
+				img.title = ser_row.img_names[i];
+			}
 			let td = document.createElement('span');
 			td.classList.add('item');
 			td.appendChild(img);
@@ -275,10 +283,14 @@ function load_tierlist(serialized_tierlist) {
 		}
 	}
 
-	if (serialized_tierlist.untiered) {
+	if (serialized_tierlist.untiered?.length) {
 		let images = document.querySelector('.images');
-		for (let img_src of serialized_tierlist.untiered) {
+		for (let i = 0; i < serialized_tierlist.untiered.length; ++i) {
+			let img_src = serialized_tierlist.untiered[i]
 			let img = create_img_with_src(img_src);
+			if (serialized_tierlist.untiered_names?.length ?? 0 > i) {
+				img.title = serialized_tierlist.untiered_names[i];
+			}
 			images.appendChild(img);
 		}
 	}
