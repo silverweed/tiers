@@ -105,6 +105,7 @@ window.addEventListener('load', () => {
 			let reader = new FileReader();
 			reader.addEventListener('load', (load_evt) => {
 				let img = create_img_with_src(load_evt.target.result);
+				img.title = file.name;
 				images.appendChild(img);
 				unsaved_changes = true;
 			});
@@ -795,14 +796,14 @@ modal_close_button.addEventListener("click", close_modal);
 
 // Close when clicking the dark background
 modal.addEventListener("click", (evt) => {
-  	if (evt.target === modal) {
-    	close_modal();
-  	}
+	if (evt.target === modal) {
+		close_modal();
+	}
 });
 
 // Close when pressing Escape
 document.addEventListener("keydown", (evt) => {
-  	if (evt.key === "Escape" && modal.classList.contains("visible")) {
-    	close_modal();
-  	}
+	if (evt.key === "Escape" && modal.classList.contains("visible")) {
+		close_modal();
+	}
 });

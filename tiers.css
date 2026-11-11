@@ -29,6 +29,10 @@ body {
 	background: #666;
 }
 
+#modalCaption label {
+	font-size: large;
+}
+
 .main-content {
 	display: flex;
 	flex-flow: column;
