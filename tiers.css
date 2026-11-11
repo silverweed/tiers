@@ -271,8 +271,20 @@ img.draggable.dragged, .button:active {
   cursor: zoom-out;
 }
 
+#modalCaption {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+}
+
 .image-modal.visible {
   display: flex;
+  flex-flow: column;
 }
 
 /* Enlarged image */
@@ -281,6 +293,7 @@ img.draggable.dragged, .button:active {
   max-height: 90vh;
   object-fit: contain;
   cursor: default;
+  flex-grow: 1;
 }
 
 /* Close button */

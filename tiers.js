@@ -43,12 +43,21 @@ let headers_orig_min_width;
 let untiered_images;
 let tierlist_div;
 let dragged_image;
+// image currently being viewed as modal
+let modal_image_viewed;
 
 // Used in drop() logic for placing items within a tier
 let old_item_index;
 
 // Used to add and remove the placement marker
 let placement_marker_div;
+
+// Enlarge image elements
+const modal = document.getElementById("imageModal");
+const modalImage = document.getElementById("modalImage");
+const modalCaptionInput = document.getElementById("modalCaptionInput");
+const modalCaptionLabel = document.getElementById("modalCaptionLabel");
+const closeButton = document.getElementById("closeModal");
 
 function reset_row(row) {
 	row.querySelectorAll('span.item').forEach((item) => {
@@ -186,6 +195,8 @@ function create_img_with_src(src) {
 	img.addEventListener("click", () => {
 		modalImage.src = img.src;
 		modalImage.alt = img.alt;
+		modal_image_viewed = img;
+		update_modal_caption(img.title);
 		modal.classList.add("visible");
 		document.body.style.overflow = "hidden";
   	});
@@ -486,6 +497,10 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 			row_color_input.style.display = "none";
 		}
 
+		if (evt.target === modalCaptionInput) {
+			update_modal_caption(modalCaptionInput.value);
+		}
+
 		unsaved_changes = true;
 	}
 
@@ -505,15 +520,15 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 		} else if (evt.timeStamp <= evt_timestamp + 200) {
 			// Do nothing
 		} else {
-			change_label();
+			change_label(evt);
 		}
 	});
 
 	container.addEventListener('click', (evt) => {
 		// Close the header and apply header edits if the header is open.
-		// Only occurs when the header, is selected.
+		// Only occurs when the header is selected.
 		if (evt.target.classList.value === "header" && input.style.display === 'inline') {
-			change_label();
+			change_label(evt);
 		} else {
 			label.style.display = 'none';
 			input.value = label.innerText.substr(0, MAX_NAME_LEN);
@@ -527,14 +542,22 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 			}
 		}
 	});
+
+	container.addEventListener('keydown', (evt) => {
+		// change label on enter
+		if (evt.keyCode === 13 && input.style.display === 'inline') {
+			change_label(evt);
+		}
+	});
 }
 
 function bind_title_events() {
-	let title_label = document.querySelector('.title-label');
-	let title_input = document.getElementById('title-input');
-	let title = document.querySelector('.title');
-
-	enable_edit_on_click(title, title_input, title_label);
+	let titles = document.querySelectorAll('.title');
+	for (let title of titles) {
+		let label = title.querySelector('label');
+		let input = title.querySelector('input');
+		enable_edit_on_click(title, input, label);
+	}
 }
 
 function create_label_input(row, row_idx, row_name) {
@@ -739,15 +762,20 @@ async function try_load_tierlist_json () {
 	}
 }
 
-// Enlarge image elements
-const modal = document.getElementById("imageModal");
-const modalImage = document.getElementById("modalImage");
-const closeButton = document.getElementById("closeModal");
+function update_modal_caption(new_value) {
+	modalCaptionInput.value = new_value;
+	modalCaptionLabel.innerText = new_value || "(untitled)";
+}
 
 function closeModal() {
-  	modal.classList.remove("visible");
-  	modalImage.src = "";
-  	document.body.style.overflow = "";
+		if (modal_image_viewed) {
+			modal_image_viewed.title = modalCaptionInput.value ?? "";
+			modal_image_viewed = null;
+		}
+		modal.classList.remove("visible");
+		modalImage.src = "";
+		update_modal_caption("");
+		document.body.style.overflow = "";
 }
 
 // Close when pressing the X button

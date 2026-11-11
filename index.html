@@ -62,10 +62,14 @@
 
     <!-- Image enlargement modal -->
     <div id="imageModal" class="image-modal" role="dialog" aria-modal="true" aria-label="Enlarged image">
-    	<button id="closeModal" class="close-modal" aria-label="Close enlarged image">
-        	&times;
-    	</button>
-    	<img id="modalImage" src="" alt=""/>
+      <button id="closeModal" class="close-modal" aria-label="Close enlarged image">
+        &times;
+      </button>
+      <img id="modalImage" src="" alt=""/>
+      <div class='title' id="modalCaption">
+          <label class='title-label' id='modalCaptionLabel' for='modalCaptionInput'>(untitled)</label>
+          <input type='text' id='modalCaptionInput' />
+      </div>
     </div>
 
   </body>
