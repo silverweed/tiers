@@ -54,10 +54,10 @@ let placement_marker_div;
 
 // Enlarge image elements
 const modal = document.getElementById("imageModal");
-const modalImage = document.getElementById("modalImage");
-const modalCaptionInput = document.getElementById("modalCaptionInput");
-const modalCaptionLabel = document.getElementById("modalCaptionLabel");
-const closeButton = document.getElementById("closeModal");
+const modal_image = document.getElementById("modalImage");
+const modal_caption_input = document.getElementById("modalCaptionInput");
+const modal_caption_label = document.getElementById("modalCaptionLabel");
+const modal_close_button = document.getElementById("closeModal");
 
 function reset_row(row) {
 	row.querySelectorAll('span.item').forEach((item) => {
@@ -193,8 +193,8 @@ function create_img_with_src(src) {
 	});
 	// Listener for enlarging image
 	img.addEventListener("click", () => {
-		modalImage.src = img.src;
-		modalImage.alt = img.alt;
+		modal_image.src = img.src;
+		modal_image.alt = img.alt;
 		modal_image_viewed = img;
 		update_modal_caption(img.title);
 		modal.classList.add("visible");
@@ -497,8 +497,8 @@ function enable_edit_on_click(container, input, label, row_color_input) {
 			row_color_input.style.display = "none";
 		}
 
-		if (evt.target === modalCaptionInput) {
-			update_modal_caption(modalCaptionInput.value);
+		if (evt.target === modal_caption_input) {
+			update_modal_caption(modal_caption_input.value);
 		}
 
 		unsaved_changes = true;
@@ -763,34 +763,34 @@ async function try_load_tierlist_json () {
 }
 
 function update_modal_caption(new_value) {
-	modalCaptionInput.value = new_value;
-	modalCaptionLabel.innerText = new_value || "(untitled)";
+	modal_caption_input.value = new_value;
+	modal_caption_label.innerText = new_value || "(untitled)";
 }
 
-function closeModal() {
+function close_modal() {
 		if (modal_image_viewed) {
-			modal_image_viewed.title = modalCaptionInput.value ?? "";
+			modal_image_viewed.title = modal_caption_input.value ?? "";
 			modal_image_viewed = null;
 		}
 		modal.classList.remove("visible");
-		modalImage.src = "";
+		modal_image.src = "";
 		update_modal_caption("");
 		document.body.style.overflow = "";
 }
 
 // Close when pressing the X button
-closeButton.addEventListener("click", closeModal);
+modal_close_button.addEventListener("click", close_modal);
 
 // Close when clicking the dark background
 modal.addEventListener("click", (evt) => {
   	if (evt.target === modal) {
-    	closeModal();
+    	close_modal();
   	}
 });
 
 // Close when pressing Escape
 document.addEventListener("keydown", (evt) => {
   	if (evt.key === "Escape" && modal.classList.contains("visible")) {
-    	closeModal();
+    	close_modal();
   	}
 });
